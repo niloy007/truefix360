@@ -1,4 +1,4 @@
-export type FormMode = "placeholder";
+export type FormMode = "live" | "placeholder";
 
 export type FormKind =
   | "contact"
@@ -11,8 +11,6 @@ export type FormSubmitResult = {
   mode: FormMode;
   receivedAt: string;
   message: string;
+  referenceNumber?: string;
+  warning?: string;
 };
-
-export type OccupancyStatus = "occupied" | "vacant" | "unknown";
-
-export type Urgency = "routine" | "priority" | "emergency";

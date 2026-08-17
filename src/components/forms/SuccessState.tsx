@@ -5,6 +5,8 @@ type SuccessStateProps = {
   title: string;
   message: string;
   note?: string;
+  referenceNumber?: string;
+  warning?: string;
   primary?: { href: string; label: string };
   secondary?: { href: string; label: string };
 };
@@ -13,6 +15,8 @@ export function SuccessState({
   title,
   message,
   note,
+  referenceNumber,
+  warning,
   primary,
   secondary,
 }: SuccessStateProps) {
@@ -23,9 +27,25 @@ export function SuccessState({
         {title}
       </h2>
       <p className="mt-4 max-w-2xl text-base leading-7 text-muted">{message}</p>
+      {referenceNumber ? (
+        <p className="mt-5 border border-line bg-cream px-4 py-4">
+          <span className="block text-xs font-semibold tracking-[0.16em] text-brand uppercase">
+            Reference number
+          </span>
+          <span className="mt-1 block font-heading text-2xl font-semibold text-ink">
+            {referenceNumber}
+          </span>
+          <span className="mt-1 block text-sm text-muted">Save this number for your records.</span>
+        </p>
+      ) : null}
       {note ? (
         <p className="mt-4 max-w-2xl border-l-2 border-brand bg-cream px-4 py-3 text-sm leading-6 text-ink">
           {note}
+        </p>
+      ) : null}
+      {warning ? (
+        <p role="status" className="mt-4 max-w-2xl text-sm leading-6 text-[#b42318]">
+          {warning}
         </p>
       ) : null}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormField } from "@/components/forms/FormField";
+import { HoneypotField } from "@/components/forms/HoneypotField";
 import { SuccessState } from "@/components/forms/SuccessState";
 import { TextareaField } from "@/components/forms/TextareaField";
 import { Button } from "@/components/ui/Button";
@@ -14,7 +15,7 @@ import {
 import { submitForm } from "@/lib/submit";
 
 export function CoverageInquiryForm() {
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{ referenceNumber?: string; warning?: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     register,
@@ -27,9 +28,10 @@ export function CoverageInquiryForm() {
   if (result) {
     return (
       <SuccessState
-        title="Coverage inquiry validated"
-        message="Thank you. The team can review this location once production delivery is connected."
-        note={result}
+        title="Coverage inquiry received"
+        message="Thank you. Our team can review this location and follow up."
+        referenceNumber={result.referenceNumber}
+        warning={result.warning}
         primary={{ href: "/contact", label: "Contact Our Team" }}
         secondary={{ href: "/get-a-quote", label: "Get a Quote" }}
       />
@@ -43,7 +45,10 @@ export function CoverageInquiryForm() {
         setSubmitError(null);
         try {
           const response = await submitForm("coverage-inquiry", values);
-          setResult(response.message);
+          setResult({
+            referenceNumber: response.referenceNumber,
+            warning: response.warning,
+          });
         } catch (error) {
           setSubmitError(
             error instanceof Error
@@ -54,6 +59,7 @@ export function CoverageInquiryForm() {
       })}
       noValidate
     >
+      <HoneypotField registration={register("companyUrl")} />
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField label="Name" required registration={register("name")} error={errors.name?.message} />
         <FormField label="Email" type="email" required registration={register("email")} error={errors.email?.message} />

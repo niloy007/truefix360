@@ -4,8 +4,8 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { CheckboxField } from "@/components/forms/CheckboxField";
-import { FileUploadField } from "@/components/forms/FileUploadField";
 import { FormField } from "@/components/forms/FormField";
+import { HoneypotField } from "@/components/forms/HoneypotField";
 import { SelectField } from "@/components/forms/SelectField";
 import { SuccessState } from "@/components/forms/SuccessState";
 import { TextareaField } from "@/components/forms/TextareaField";
@@ -66,9 +66,8 @@ const workersCompOptions = [
 
 export function VendorApplyForm() {
   const [step, setStep] = useState(0);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{ referenceNumber?: string; warning?: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [documentNames, setDocumentNames] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
@@ -82,6 +81,7 @@ export function VendorApplyForm() {
       independentContractor: false,
       permissionToContact: false,
       terms: false,
+      companyUrl: "",
     },
   });
 
@@ -93,9 +93,10 @@ export function VendorApplyForm() {
   if (result) {
     return (
       <SuccessState
-        title="Application details validated"
-        message="Submitting an application does not guarantee assignments or work volume. Secure storage and team notification will be connected in a later phase."
-        note={result}
+        title="We received your vendor application"
+        message="Submitting an application does not guarantee work assignments or work volume."
+        referenceNumber={result.referenceNumber}
+        warning={result.warning}
         primary={{ href: "/vendors", label: "Vendor Information" }}
         secondary={{ href: "/", label: "Return Home" }}
       />
@@ -104,17 +105,15 @@ export function VendorApplyForm() {
 
   return (
     <form
-      className="grid gap-8"
+      className="grid gap-8 relative"
       onSubmit={handleSubmit(async (values) => {
         setSubmitError(null);
         try {
-          const response = await submitForm("vendor-application", {
-            ...values,
-            documentNames,
-            taxIdNote:
-              "EIN / Tax ID is collected later during secure onboarding and was not requested here.",
+          const response = await submitForm("vendor-application", values);
+          setResult({
+            referenceNumber: response.referenceNumber,
+            warning: response.warning,
           });
-          setResult(response.message);
         } catch (error) {
           setSubmitError(
             error instanceof Error
@@ -125,6 +124,7 @@ export function VendorApplyForm() {
       })}
       noValidate
     >
+      <HoneypotField registration={register("companyUrl")} />
       <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {steps.map((label, index) => (
           <li
@@ -239,13 +239,11 @@ export function VendorApplyForm() {
 
       {step === 5 ? (
         <div className="grid gap-5">
-          <FileUploadField
-            label="Documents"
-            name="vendor-docs"
-            accept=".pdf,.jpg,.jpeg,.png"
-            hint="Display only: W-9, General Liability Insurance, Workers Compensation if applicable, and Business License if applicable. Permanent document storage is a future implementation point."
-            onFiles={(files) => setDocumentNames(files.map((file) => file.name))}
-          />
+          <div className="border-l-2 border-brand bg-cream px-4 py-3 text-sm leading-6 text-ink">
+            W-9, insurance certificates, and business licenses are collected later
+            through the secure Vendor Portal after an application is approved.
+            Do not email tax IDs or Social Security numbers.
+          </div>
           <CheckboxField
             label="The information in this application is accurate to the best of my knowledge."
             registration={register("accurate")}

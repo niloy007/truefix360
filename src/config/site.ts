@@ -10,6 +10,6 @@ export const site = {
 } as const;
 
 export const formSubmission = {
-  mode: "placeholder" as const,
+  mode: "live" as const,
   endpoint: "/api/forms",
 };

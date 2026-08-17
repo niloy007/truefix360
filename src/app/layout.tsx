@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
+import { AppChrome } from "@/components/layout/AppChrome";
 import { company } from "@/config/company";
 import { ogImage } from "@/config/images";
 import { site } from "@/config/site";
@@ -72,9 +71,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <AppChrome>{children}</AppChrome>
       </body>
     </html>
   );

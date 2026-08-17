@@ -1,46 +1,27 @@
-import { PLACEHOLDER_MESSAGE } from "@/lib/submit";
-import type { FormKind, FormSubmitResult } from "@/types";
+import { submitContact, submitCoverage, submitQuote, submitVendor } from "@/lib/forms/public";
+import { formErrorResponse, jsonSuccess, parseJsonPayload, readIdempotencyKey } from "@/lib/forms/http";
 
-const allowedKinds: FormKind[] = [
-  "contact",
-  "quote",
-  "vendor-application",
-  "coverage-inquiry",
-];
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-export async function POST(request: Request): Promise<Response> {
-  let body: unknown;
-
+export async function POST(request: Request) {
   try {
-    body = await request.json();
-  } catch {
-    return Response.json(
-      { message: "The request body was not valid JSON." },
-      { status: 400 },
-    );
+    const body = await request.json();
+    const kind = isRecord(body) ? body.kind : null;
+    const payload = parseJsonPayload(body);
+    const key = readIdempotencyKey(request, isRecord(body) ? body : undefined);
+
+    if (kind === "contact") return jsonSuccess(await submitContact(payload, key));
+    if (kind === "quote") return jsonSuccess(await submitQuote(payload, [], key));
+    if (kind === "vendor-application") return jsonSuccess(await submitVendor(payload, key));
+    if (kind === "coverage-inquiry") return jsonSuccess(await submitCoverage(payload, key));
+
+    return Response.json({ message: "A valid form type is required." }, { status: 400 });
+  } catch (error) {
+    return formErrorResponse(error);
   }
-
-  if (!isRecord(body) || !isFormKind(body.kind) || !isRecord(body.payload)) {
-    return Response.json(
-      { message: "A valid form type and payload are required." },
-      { status: 400 },
-    );
-  }
-
-  const result: FormSubmitResult = {
-    ok: true,
-    mode: "placeholder",
-    receivedAt: new Date().toISOString(),
-    message: PLACEHOLDER_MESSAGE,
-  };
-
-  return Response.json(result);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isFormKind(value: unknown): value is FormKind {
-  return typeof value === "string" && allowedKinds.includes(value as FormKind);
 }

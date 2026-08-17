@@ -16,7 +16,7 @@ type FileUploadFieldProps = {
 export function FileUploadField({
   label,
   name,
-  hint = "Files are shown here for completeness. Permanent document storage is not enabled in this first website release.",
+  hint = "JPG, PNG, WebP, or PDF. Up to 5 files, 10 MB each.",
   accept,
   multiple = true,
   onFiles,
@@ -31,7 +31,7 @@ export function FileUploadField({
       >
         <Upload className="size-6 text-brand" aria-hidden="true" />
         <span className="text-sm font-medium text-ink">Choose files or drop them here</span>
-        <span className="text-xs text-muted">UI only in this release — files are not uploaded to storage.</span>
+        <span className="text-xs text-muted">JPG, PNG, WebP, or PDF — max 10 MB each.</span>
         <input
           id={name}
           name={name}
@@ -40,9 +40,9 @@ export function FileUploadField({
           multiple={multiple}
           className="sr-only"
           onChange={(event) => {
-            const files = Array.from(event.target.files ?? []);
-            setNames(files.map((file) => file.name));
-            onFiles(files);
+            const next = Array.from(event.target.files ?? []).slice(0, 5);
+            setNames(next.map((file) => file.name));
+            onFiles(next);
           }}
         />
       </label>

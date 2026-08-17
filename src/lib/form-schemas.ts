@@ -2,69 +2,72 @@ import { z } from "zod";
 import { usStates } from "@/data/us-states";
 import { vendorServiceOptions } from "@/data/vendors";
 
-const required = (label: string) =>
-  z.string().trim().min(1, `${label} is required.`);
+const required = (label: string, max = 200) =>
+  z.string().trim().min(1, `${label} is required.`).max(max, `${label} is too long.`);
 
 export const contactSchema = z.object({
-  name: required("Name"),
-  company: z.string().trim().optional(),
-  email: z.email("Enter a valid email address."),
-  phone: required("Phone"),
-  topic: required("Topic"),
-  message: required("Message").min(12, "Please provide a bit more detail."),
+  name: required("Name", 120),
+  company: z.string().trim().max(160).optional(),
+  email: z.email("Enter a valid email address.").max(160),
+  phone: required("Phone", 40),
+  topic: required("Topic", 80),
+  message: required("Message", 5000).min(12, "Please provide a bit more detail."),
+  companyUrl: z.string().max(200).optional(),
 });
 
 export type ContactValues = z.infer<typeof contactSchema>;
 
 export const quoteSchema = z.object({
-  firstName: required("First name"),
-  lastName: required("Last name"),
-  company: z.string().trim().optional(),
-  email: z.email("Enter a valid email address."),
-  phone: required("Phone"),
-  propertyAddress: required("Property address"),
-  city: required("City"),
-  state: required("State"),
-  zip: required("ZIP"),
-  propertyType: required("Property type"),
-  occupancyStatus: required("Occupancy status"),
-  serviceCategory: required("Service category"),
-  requestedService: required("Requested service"),
-  description: required("Description").min(12, "Please describe the work needed."),
-  urgency: required("Urgency"),
-  preferredDate: z.string().optional(),
-  numberOfProperties: required("Number of properties"),
-  preferredContactMethod: required("Preferred contact method"),
+  firstName: required("First name", 80),
+  lastName: required("Last name", 80),
+  company: z.string().trim().max(160).optional(),
+  email: z.email("Enter a valid email address.").max(160),
+  phone: required("Phone", 40),
+  propertyAddress: required("Property address", 200),
+  city: required("City", 80),
+  state: required("State", 2),
+  zip: required("ZIP", 16),
+  propertyType: required("Property type", 80),
+  occupancyStatus: required("Occupancy status", 40),
+  serviceCategory: required("Service category", 80),
+  requestedService: required("Requested service", 160),
+  description: required("Description", 8000).min(12, "Please describe the work needed."),
+  urgency: required("Urgency", 40),
+  preferredDate: z.string().max(20).optional(),
+  numberOfProperties: required("Number of properties", 20),
+  preferredContactMethod: required("Preferred contact method", 40),
+  companyUrl: z.string().max(200).optional(),
 });
 
 export type QuoteValues = z.infer<typeof quoteSchema>;
 
 export const vendorSchema = z.object({
-  companyName: required("Company / business name"),
-  firstName: required("First name"),
-  lastName: required("Last name"),
-  email: z.email("Enter a valid email address."),
-  phone: required("Phone"),
-  website: z.string().trim().optional(),
-  address: required("Business address"),
-  city: required("City"),
-  state: required("State"),
-  zip: required("ZIP"),
-  businessType: required("Business type"),
-  yearsInBusiness: required("Years in business"),
-  crewCount: required("Number of field technicians / crews"),
-  insuranceStatus: required("Insurance status"),
-  workersCompStatus: required("Workers compensation status"),
-  services: z.array(z.string()).min(1, "Select at least one service."),
-  statesCovered: required("States covered"),
-  countiesCities: required("Counties / cities covered"),
-  travelRadius: required("Travel radius"),
-  willingToTravel: required("Travel preference"),
-  tripCharge: required("Trip charge"),
-  businessHours: required("Normal business hours"),
-  emergencyAvailability: required("Emergency availability"),
-  weekendAvailability: required("Weekend availability"),
-  experience: required("Experience").min(20, "Please share a bit more about your experience."),
+  companyName: required("Company / business name", 160),
+  firstName: required("First name", 80),
+  lastName: required("Last name", 80),
+  email: z.email("Enter a valid email address.").max(160),
+  phone: required("Phone", 40),
+  website: z.string().trim().max(200).optional(),
+  address: required("Business address", 200),
+  city: required("City", 80),
+  state: required("State", 2),
+  zip: required("ZIP", 16),
+  businessType: required("Business type", 80),
+  yearsInBusiness: required("Years in business", 20),
+  crewCount: required("Number of field technicians / crews", 20),
+  insuranceStatus: required("Insurance status", 80),
+  workersCompStatus: required("Workers compensation status", 80),
+  services: z.array(z.string().max(80)).min(1, "Select at least one service."),
+  statesCovered: required("States covered", 400),
+  countiesCities: required("Counties / cities covered", 2000),
+  travelRadius: required("Travel radius", 80),
+  willingToTravel: required("Travel preference", 20),
+  tripCharge: required("Trip charge", 20),
+  businessHours: required("Normal business hours", 160),
+  emergencyAvailability: required("Emergency availability", 20),
+  weekendAvailability: required("Weekend availability", 20),
+  experience: required("Experience", 8000).min(20, "Please share a bit more about your experience."),
+  companyUrl: z.string().max(200).optional(),
   accurate: z
     .boolean()
     .refine((value) => value === true, "Please confirm the information is accurate."),
@@ -85,10 +88,11 @@ export const vendorSchema = z.object({
 export type VendorValues = z.infer<typeof vendorSchema>;
 
 export const coverageInquirySchema = z.object({
-  name: required("Name"),
-  email: z.email("Enter a valid email address."),
-  location: required("Location"),
-  message: z.string().trim().optional(),
+  name: required("Name", 120),
+  email: z.email("Enter a valid email address.").max(160),
+  location: required("Location", 160),
+  message: z.string().trim().max(2000).optional(),
+  companyUrl: z.string().max(200).optional(),
 });
 
 export type CoverageInquiryValues = z.infer<typeof coverageInquirySchema>;

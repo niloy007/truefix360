@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/components/forms/LoginForm";
 import { Container } from "@/components/ui/Container";
 import { pageMetadata } from "@/lib/seo";
@@ -19,13 +20,14 @@ export default function LoginPage() {
             Welcome Back
           </h1>
           <p className="mt-5 max-w-md text-muted-dark leading-7">
-            Portals for clients, partners, and vendors will connect here. This
-            screen is the branded entry point. It does not store passwords or
-            create accounts.
+            Sign in to the client, vendor, or TrueFix360 staff portal. Access is
+            provisioned by TrueFix360. This screen does not create public accounts.
           </p>
         </div>
         <div className="border border-white/10 bg-white p-6 sm:p-8">
-          <LoginForm />
+          <Suspense fallback={<p className="text-sm text-muted">Loading sign-in…</p>}>
+            <LoginForm />
+          </Suspense>
         </div>
       </Container>
     </section>

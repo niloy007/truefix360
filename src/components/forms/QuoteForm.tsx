@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FileUploadField } from "@/components/forms/FileUploadField";
 import { FormField } from "@/components/forms/FormField";
+import { HoneypotField } from "@/components/forms/HoneypotField";
 import { SelectField } from "@/components/forms/SelectField";
 import { SuccessState } from "@/components/forms/SuccessState";
 import { TextareaField } from "@/components/forms/TextareaField";
@@ -15,7 +16,7 @@ import {
   stateOptions,
   type QuoteValues,
 } from "@/lib/form-schemas";
-import { submitForm } from "@/lib/submit";
+import { submitQuoteForm } from "@/lib/submit";
 
 const propertyTypes = [
   { value: "single-family", label: "Single Family" },
@@ -44,9 +45,9 @@ const contactMethods = [
 ];
 
 export function QuoteForm() {
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{ referenceNumber?: string; warning?: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const {
     register,
     handleSubmit,
@@ -58,9 +59,10 @@ export function QuoteForm() {
   if (result) {
     return (
       <SuccessState
-        title="Quote request validated"
-        message="Submitting a request does not constitute acceptance of work or final pricing. Once production delivery is connected, the team will review requests and follow up."
-        note={result}
+        title="Your service/quote request has been received"
+        message="Submitting a request does not constitute acceptance of work or final pricing. Our team will review the details and follow up."
+        referenceNumber={result.referenceNumber}
+        warning={result.warning}
         primary={{ href: "/", label: "Return Home" }}
         secondary={{ href: "/contact", label: "Contact Our Team" }}
       />
@@ -73,11 +75,11 @@ export function QuoteForm() {
       onSubmit={handleSubmit(async (values) => {
         setSubmitError(null);
         try {
-          const response = await submitForm("quote", {
-            ...values,
-            attachmentNames: fileNames,
+          const response = await submitQuoteForm(values, files);
+          setResult({
+            referenceNumber: response.referenceNumber,
+            warning: response.warning,
           });
-          setResult(response.message);
         } catch (error) {
           setSubmitError(
             error instanceof Error
@@ -88,6 +90,7 @@ export function QuoteForm() {
       })}
       noValidate
     >
+      <HoneypotField registration={register("companyUrl")} />
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField label="First Name" required registration={register("firstName")} error={errors.firstName?.message} autoComplete="given-name" />
         <FormField label="Last Name" required registration={register("lastName")} error={errors.lastName?.message} autoComplete="family-name" />
@@ -124,7 +127,7 @@ export function QuoteForm() {
         label="Photos or files"
         name="quote-files"
         accept="image/*,.pdf"
-        onFiles={(files) => setFileNames(files.map((file) => file.name))}
+        onFiles={setFiles}
       />
       <p className="text-sm leading-6 text-muted">
         Submitting a request does not constitute acceptance of work or final pricing.

@@ -9,6 +9,7 @@ import { FormField } from "@/components/forms/FormField";
 import { SelectField } from "@/components/forms/SelectField";
 import { SuccessState } from "@/components/forms/SuccessState";
 import { TextareaField } from "@/components/forms/TextareaField";
+import { HoneypotField } from "@/components/forms/HoneypotField";
 import { contactSchema, contactTopics, type ContactValues } from "@/lib/form-schemas";
 import { submitForm } from "@/lib/submit";
 
@@ -21,7 +22,7 @@ export function ContactForm() {
       : topicParam === "resident"
         ? "resident"
         : topicParam ?? "";
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<{ message: string; referenceNumber?: string; warning?: string } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     register,
@@ -31,15 +32,17 @@ export function ContactForm() {
     resolver: zodResolver(contactSchema),
     defaultValues: {
       topic: defaultTopic,
+      companyUrl: "",
     },
   });
 
   if (result) {
     return (
       <SuccessState
-        title="Message received by the website"
-        message="Thank you for contacting TrueFix360. Your details were validated."
-        note={result}
+        title="Your message has been received"
+        message="Thank you for contacting TrueFix360."
+        referenceNumber={result.referenceNumber}
+        warning={result.warning}
         primary={{ href: "/", label: "Return Home" }}
         secondary={{ href: "/get-a-quote", label: "Request a Quote" }}
       />
@@ -53,7 +56,11 @@ export function ContactForm() {
         setSubmitError(null);
         try {
           const response = await submitForm("contact", values);
-          setResult(response.message);
+          setResult({
+            message: response.message,
+            referenceNumber: response.referenceNumber,
+            warning: response.warning,
+          });
         } catch (error) {
           setSubmitError(
             error instanceof Error
@@ -64,6 +71,7 @@ export function ContactForm() {
       })}
       noValidate
     >
+      <HoneypotField registration={register("companyUrl")} />
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField
           label="Name"
