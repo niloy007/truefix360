@@ -24,9 +24,18 @@ export function AppChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <LegacyRecoveryHashCatcher />
-      <SiteHeader />
-      <main className="flex-1">{children}</main>
-      <SiteFooter />
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <div className="print:hidden">
+        <SiteHeader />
+      </div>
+      <main id="main-content" className="flex-1">
+        {children}
+      </main>
+      <div className="print:hidden">
+        <SiteFooter />
+      </div>
     </>
   );
 }

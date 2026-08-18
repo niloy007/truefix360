@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { CheckboxField } from "@/components/forms/CheckboxField";
@@ -260,7 +261,19 @@ export function VendorApplyForm() {
             error={errors.permissionToContact?.message}
           />
           <CheckboxField
-            label="I acknowledge the website Terms of Service and understand that submitting an application does not guarantee assignments or work volume."
+            label={
+              <>
+                I acknowledge the website{" "}
+                <Link href="/terms" className="font-medium underline decoration-brand/40 underline-offset-2 hover:text-brand">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="font-medium underline decoration-brand/40 underline-offset-2 hover:text-brand">
+                  Privacy Policy
+                </Link>{" "}
+                and understand that submitting an application does not guarantee assignments or work volume.
+              </>
+            }
             registration={register("terms")}
             error={errors.terms?.message}
           />

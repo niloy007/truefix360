@@ -35,7 +35,7 @@ export function FieldWrap({
       {children}
       {hint && !error ? <p className="mt-1 text-xs leading-5 text-muted">{hint}</p> : null}
       {error ? (
-        <p role="alert" className="mt-1 text-sm text-[#b42318]">
+        <p id={`${htmlFor}-error`} role="alert" className="mt-1 text-sm text-[#b42318]">
           {error}
         </p>
       ) : null}

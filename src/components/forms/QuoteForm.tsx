@@ -9,6 +9,7 @@ import { HoneypotField } from "@/components/forms/HoneypotField";
 import { SelectField } from "@/components/forms/SelectField";
 import { SuccessState } from "@/components/forms/SuccessState";
 import { TextareaField } from "@/components/forms/TextareaField";
+import { FormLegalNotice } from "@/components/forms/FormLegalNotice";
 import { Button } from "@/components/ui/Button";
 import {
   quoteCategories,
@@ -137,6 +138,7 @@ export function QuoteForm() {
           {submitError}
         </p>
       ) : null}
+      <FormLegalNotice />
       <Button type="submit" disabled={isSubmitting} arrow>
         {isSubmitting ? "Submitting…" : "Request a Quote"}
       </Button>

@@ -1,9 +1,9 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { cn } from "@/lib/utils";
 
 type CheckboxFieldProps = {
-  label: string;
+  label: ReactNode;
   error?: string;
   registration: UseFormRegisterReturn;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "name" | "type">;

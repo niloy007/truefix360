@@ -86,6 +86,17 @@ export function LoginForm() {
       <Button type="submit" disabled={pending} arrow>
         {pending ? "Signing in…" : "Sign In"}
       </Button>
+      <p className="text-xs leading-5 text-muted">
+        Use of this portal is subject to our{" "}
+        <Link href="/privacy" className="font-medium text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand">
+          Privacy Policy
+        </Link>{" "}
+        and{" "}
+        <Link href="/terms" className="font-medium text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand">
+          Terms of Service
+        </Link>
+        .
+      </p>
       <p className="text-sm text-muted">
         Need access?{" "}
         <Link href="/contact" className="font-semibold text-ink hover:text-brand">

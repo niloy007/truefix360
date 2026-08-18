@@ -8,6 +8,7 @@ import { HoneypotField } from "@/components/forms/HoneypotField";
 import { SelectField } from "@/components/forms/SelectField";
 import { SuccessState } from "@/components/forms/SuccessState";
 import { TextareaField } from "@/components/forms/TextareaField";
+import { FormLegalNotice } from "@/components/forms/FormLegalNotice";
 import { Button } from "@/components/ui/Button";
 import { services } from "@/data/services";
 import {
@@ -110,6 +111,10 @@ export function CoverageRequestForm({
       <TextareaField label="Description" required registration={register("description")} error={errors.description?.message} />
       <HoneypotField registration={register("companyUrl")} />
       {submitError ? <p className="text-sm text-red-800">{submitError}</p> : null}
+      <p className="text-sm leading-6 text-muted">
+        A request does not guarantee that local coverage can be sourced.
+      </p>
+      <FormLegalNotice />
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Submitting…" : "Request Coverage Review"}
       </Button>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { FormLegalNotice } from "@/components/forms/FormLegalNotice";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/forms/FormField";
 import { SelectField } from "@/components/forms/SelectField";
@@ -123,6 +124,7 @@ export function ContactForm() {
           {submitError}
         </p>
       ) : null}
+      <FormLegalNotice />
       <Button type="submit" disabled={isSubmitting} arrow>
         {isSubmitting ? "Sending…" : "Send Message"}
       </Button>

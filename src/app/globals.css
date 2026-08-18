@@ -138,3 +138,70 @@ h4,
   color: var(--muted);
   cursor: not-allowed;
 }
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  background: var(--white);
+  color: var(--ink);
+  padding: 0.65rem 1rem;
+  font-weight: 600;
+  border: 2px solid var(--brand);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+.legal-copy a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-copy a:hover {
+  color: var(--brand);
+}
+
+.legal-copy strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+@media print {
+  .skip-link,
+  .legal-toc,
+  .legal-related {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .legal-hero {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .legal-hero .pattern-grid,
+  .legal-hero .bg-linear-to-l {
+    display: none !important;
+  }
+
+  .legal-copy,
+  .legal-hero p,
+  .legal-hero h1 {
+    color: #000 !important;
+  }
+
+  a[href^="mailto:"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.9em;
+    word-break: break-all;
+  }
+}
