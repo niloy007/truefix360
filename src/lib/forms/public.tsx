@@ -28,6 +28,10 @@ import {
   summarizeText,
 } from "@/lib/format";
 import { checkCoverage, recordDemandGap } from "@/lib/coverage/service";
+import {
+  buildVendorApplicationStorage,
+  formatCoverageSummary,
+} from "@/lib/vendor-application/coverage";
 import { displayCountyName, normalizeStateCode, serviceLabel } from "@/lib/coverage/logic";
 import { notify } from "@/lib/notifications";
 import { storePrivateFiles } from "@/lib/storage";
@@ -297,14 +301,7 @@ export async function submitVendor(input: unknown, idempotencyKey: string | null
       insurance_status: parsed.insuranceStatus,
       workers_comp_status: parsed.workersCompStatus,
       services: parsed.services,
-      states_covered: parsed.statesCovered,
-      counties_cities: parsed.countiesCities,
-      travel_radius: parsed.travelRadius,
-      willing_to_travel: parsed.willingToTravel,
-      trip_charge_required: parsed.tripCharge,
-      normal_hours: parsed.businessHours,
-      emergency_availability: parsed.emergencyAvailability,
-      weekend_availability: parsed.weekendAvailability,
+      ...buildVendorApplicationStorage(parsed),
       experience: parsed.experience,
     })
     .select("id, created_at")
@@ -340,8 +337,8 @@ export async function submitVendor(input: unknown, idempotencyKey: string | null
             city={parsed.city}
             state={parsed.state}
             services={parsed.services.join(", ")}
-            statesCovered={parsed.statesCovered}
-            travelRadius={parsed.travelRadius}
+            statesCovered={formatCoverageSummary(parsed.coverageGroups)}
+            travelRadius={buildVendorApplicationStorage(parsed).travel_radius}
             insuranceStatus={parsed.insuranceStatus}
             workersCompStatus={parsed.workersCompStatus}
             emergencyAvailability={parsed.emergencyAvailability}

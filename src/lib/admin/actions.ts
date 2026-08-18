@@ -6,6 +6,7 @@ import { getSiteUrl } from "@/config/env";
 import { writeAuditLog } from "@/lib/audit";
 import { requireInternalStaff } from "@/lib/auth/guards";
 import { proposeCoverageFromApplication } from "@/lib/coverage/service";
+import { formatCoverageSummary, parseCoveragePayload } from "@/lib/vendor-application/coverage";
 import { retryNotification } from "@/lib/notifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AppRole } from "@/config/platform";
@@ -157,7 +158,7 @@ export async function approveVendorApplication(id: string) {
     state: app.state,
     zip: app.zip,
     service_categories: app.services,
-    coverage: `${app.states_covered}; ${app.counties_cities}`,
+    coverage: formatCoverageSummary(parseCoveragePayload(app.states_covered ?? "", app.counties_cities ?? "")),
     insurance_status: app.insurance_status,
     workers_comp_status: app.workers_comp_status,
     onboarding_status: "approved",

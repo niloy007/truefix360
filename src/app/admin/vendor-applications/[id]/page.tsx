@@ -3,6 +3,14 @@ import { approveVendorApplication, updateVendorApplicationStatus } from "@/lib/a
 import { formatDateTime } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
+import {
+  EMERGENCY_OPTIONS,
+  WEEKEND_OPTIONS,
+  YES_NO_DEPENDS,
+  formatChoiceLabel,
+  parseCoveragePayload,
+  stateName,
+} from "@/lib/vendor-application/coverage";
 
 const statuses = ["submitted", "reviewing", "more_information_needed", "approved", "declined", "onboarded"];
 
@@ -15,6 +23,7 @@ export default async function AdminVendorApplicationDetailPage({
   const admin = createAdminClient();
   const { data } = await admin.from("vendor_applications").select("*").eq("id", id).maybeSingle();
   if (!data) notFound();
+  const coverageGroups = parseCoveragePayload(data.states_covered ?? "", data.counties_cities ?? "");
 
   return (
     <div className="space-y-6">
@@ -55,18 +64,63 @@ export default async function AdminVendorApplicationDetailPage({
           ["Insurance", data.insurance_status],
           ["Workers comp", data.workers_comp_status],
           ["Services", (data.services ?? []).join(", ")],
-          ["States covered", data.states_covered],
-          ["Counties / cities", data.counties_cities],
-          ["Travel radius", data.travel_radius],
-          ["Willing to travel", data.willing_to_travel],
-          ["Trip charge", data.trip_charge_required],
-          ["Hours", data.normal_hours],
-          ["Emergency", data.emergency_availability],
-          ["Weekend", data.weekend_availability],
           ["Experience", data.experience],
           ["Submitted", formatDateTime(data.created_at)],
         ]}
       />
+      <section className="space-y-4 border border-line bg-white p-4 sm:p-5">
+        <h2 className="font-heading text-xl font-semibold">Coverage</h2>
+        {coverageGroups.length === 0 ? (
+          <p className="text-sm text-muted">No structured coverage was provided.</p>
+        ) : (
+          coverageGroups.map((group) => (
+            <div key={group.state} className="grid gap-2 border-t border-line pt-4">
+              <h3 className="font-semibold uppercase tracking-wide">{stateName(group.state)}</h3>
+              <p className="text-sm">
+                <span className="text-muted">Counties: </span>
+                {group.allCounties
+                  ? "All counties claimed (unverified statewide claim — not published as public coverage)"
+                  : group.counties.join(", ") || "—"}
+              </p>
+              <p className="text-sm">
+                <span className="text-muted">Cities / Service Areas: </span>
+                {group.cities.join(", ") || "—"}
+              </p>
+              <p className="text-sm">
+                <span className="text-muted">Additional Nearby Areas: </span>
+                {group.nearbyAreas ? "Yes" : "No"}
+              </p>
+            </div>
+          ))
+        )}
+        <p className="text-sm">
+          <span className="text-muted">Travel Radius: </span>
+          {data.travel_radius ? `${data.travel_radius} miles` : "—"}
+        </p>
+        <p className="text-sm">
+          <span className="text-muted">Willing to travel: </span>
+          {formatChoiceLabel(data.willing_to_travel ?? "", YES_NO_DEPENDS)}
+        </p>
+        <p className="text-sm">
+          <span className="text-muted">Trip charge: </span>
+          {formatChoiceLabel(data.trip_charge_required ?? "", YES_NO_DEPENDS)}
+        </p>
+      </section>
+      <section className="space-y-3 border border-line bg-white p-4 sm:p-5">
+        <h2 className="font-heading text-xl font-semibold">Availability</h2>
+        <p className="text-sm">
+          <span className="text-muted">Business Hours: </span>
+          {data.normal_hours || "—"}
+        </p>
+        <p className="text-sm">
+          <span className="text-muted">Emergency Availability: </span>
+          {formatChoiceLabel(data.emergency_availability ?? "", EMERGENCY_OPTIONS)}
+        </p>
+        <p className="text-sm">
+          <span className="text-muted">Weekend Availability: </span>
+          {formatChoiceLabel(data.weekend_availability ?? "", WEEKEND_OPTIONS)}
+        </p>
+      </section>
     </div>
   );
 }

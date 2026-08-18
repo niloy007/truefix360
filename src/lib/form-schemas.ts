@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { usStates } from "@/data/us-states";
 import { vendorServiceOptions } from "@/data/vendors";
+import {
+  coverageValidationMessages,
+  parseTravelRadiusMiles,
+} from "@/lib/vendor-application/coverage";
 
 const required = (label: string, max = 200) =>
   z.string().trim().min(1, `${label} is required.`).max(max, `${label} is too long.`);
@@ -58,12 +62,22 @@ export const vendorSchema = z.object({
   insuranceStatus: required("Insurance status", 80),
   workersCompStatus: required("Workers compensation status", 80),
   services: z.array(z.string().max(80)).min(1, "Select at least one service."),
-  statesCovered: required("States covered", 400),
-  countiesCities: required("Counties / cities covered", 2000),
-  travelRadius: required("Travel radius", 80),
+  coverageStates: z.array(z.string()),
+  coverageGroups: z.array(
+    z.object({
+      state: z.string(),
+      allCounties: z.boolean(),
+      counties: z.array(z.string()),
+      cities: z.array(z.string()),
+      nearbyAreas: z.boolean(),
+    }),
+  ),
+  travelRadiusPreset: required("Travel radius", 20),
+  travelRadiusCustom: z.string().optional(),
   willingToTravel: required("Travel preference", 20),
   tripCharge: required("Trip charge", 20),
-  businessHours: required("Normal business hours", 160),
+  businessHoursPreset: required("Normal business hours", 40),
+  businessHoursCustom: z.string().optional(),
   emergencyAvailability: required("Emergency availability", 20),
   weekendAvailability: required("Weekend availability", 20),
   experience: required("Experience", 8000).min(20, "Please share a bit more about your experience."),
@@ -83,6 +97,40 @@ export const vendorSchema = z.object({
   terms: z
     .boolean()
     .refine((value) => value === true, "Terms acknowledgement is required."),
+}).superRefine((values, ctx) => {
+  const coverageErrors = coverageValidationMessages({
+    coverageStates: values.coverageStates,
+    coverageGroups: values.coverageGroups,
+  });
+  if (coverageErrors.coverageStates) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["coverageStates"],
+      message: coverageErrors.coverageStates,
+    });
+  }
+  if (coverageErrors.coverageGroups) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["coverageGroups"],
+      message: coverageErrors.coverageGroups,
+    });
+  }
+  const radius = parseTravelRadiusMiles(values.travelRadiusPreset, values.travelRadiusCustom ?? "");
+  if (radius.error) {
+    ctx.addIssue({
+      code: "custom",
+      path: values.travelRadiusPreset === "custom" ? ["travelRadiusCustom"] : ["travelRadiusPreset"],
+      message: radius.error,
+    });
+  }
+  if (values.businessHoursPreset === "custom" && !(values.businessHoursCustom ?? "").trim()) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["businessHoursCustom"],
+      message: "Enter your custom business hours.",
+    });
+  }
 });
 
 export type VendorValues = z.infer<typeof vendorSchema>;

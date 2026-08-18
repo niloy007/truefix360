@@ -7,10 +7,9 @@ import {
   normalizeCountyKey,
   normalizeStateCode,
   serviceLabel,
-  splitList,
-  vendorServiceToSlug,
   type PublicCoverageStatus,
 } from "@/lib/coverage/logic";
+import { buildProposedCoverageRows, parseCoveragePayload } from "@/lib/vendor-application/coverage";
 
 export type CoverageCheckResult = {
   status: PublicCoverageStatus;
@@ -118,38 +117,18 @@ export async function proposeCoverageFromApplication(input: {
   services: string[] | null;
   travelRadius?: string | null;
 }) {
-  const states = splitList(input.statesCovered)
-    .map((value) => normalizeStateCode(value))
-    .filter((value): value is string => Boolean(value));
-  const counties = splitList(input.countiesCities);
-  const services = (input.services ?? [])
-    .map((value) => vendorServiceToSlug(value))
-    .filter((value): value is NonNullable<typeof value> => Boolean(value));
-  if (states.length === 0 || counties.length === 0 || services.length === 0) return 0;
+  const groups = parseCoveragePayload(input.statesCovered, input.countiesCities);
+  const rows = buildProposedCoverageRows({
+    applicationId: input.applicationId,
+    organizationId: input.organizationId,
+    profileId: input.profileId,
+    groups,
+    services: input.services,
+    travelRadiusMiles: Number.parseInt(String(input.travelRadius ?? ""), 10) || null,
+  });
+  if (rows.length === 0) return 0;
 
   const admin = createAdminClient();
-  const rows = [];
-  for (const state of states) {
-    for (const county of counties) {
-      const key = normalizeCountyKey(county);
-      if (!key) continue;
-      for (const service of services) {
-        rows.push({
-          vendor_organization_id: input.organizationId,
-          vendor_profile_id: input.profileId ?? null,
-          vendor_application_id: input.applicationId,
-          state_code: state,
-          county_name: displayCountyName(county),
-          normalized_county_name: key,
-          service_category: service,
-          status: "proposed",
-          verification_status: "unverified",
-          travel_radius_miles: Number.parseInt(String(input.travelRadius ?? ""), 10) || null,
-        });
-      }
-    }
-  }
-  if (rows.length === 0) return 0;
   await admin.from("vendor_coverage").upsert(rows, {
     onConflict: "vendor_organization_id,state_code,normalized_county_name,service_category",
   });
