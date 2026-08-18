@@ -15,6 +15,11 @@ export default async function AdminVendorDetailPage({
   const { data } = await admin.from("organizations").select("*").eq("id", id).eq("type", "vendor").maybeSingle();
   if (!data) notFound();
   const { data: profile } = await admin.from("vendor_profiles").select("*").eq("organization_id", id).maybeSingle();
+  const { data: coverage } = await admin
+    .from("vendor_coverage")
+    .select("id, state_code, county_name, service_category, status, verification_status")
+    .eq("vendor_organization_id", id)
+    .order("state_code");
   const { data: docs } = await admin.from("vendor_documents").select("*").eq("vendor_organization_id", id);
   const signed = await Promise.all(
     (docs ?? []).map(async (doc) => ({
@@ -35,6 +40,17 @@ export default async function AdminVendorDetailPage({
           ["Internal notes", profile?.internal_notes],
         ]}
       />
+      <section>
+        <h2 className="font-heading text-xl font-semibold">Coverage</h2>
+        <p className="mt-1 text-sm text-muted">Proposed coverage is not public until a staff member verifies it.</p>
+        <ul className="mt-3 divide-y divide-line border border-line bg-white text-sm">
+          {(coverage ?? []).length === 0 ? <li className="px-4 py-3 text-muted">No coverage records yet.</li> : (coverage ?? []).map((row) => (
+            <li key={row.id} className="px-4 py-3">
+              {row.county_name}, {row.state_code} · {row.service_category} · {row.status} / {row.verification_status}
+            </li>
+          ))}
+        </ul>
+      </section>
       <section>
         <h2 className="font-heading text-xl font-semibold">Documents</h2>
         <ul className="mt-3 space-y-2 text-sm">

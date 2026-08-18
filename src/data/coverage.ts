@@ -11,34 +11,28 @@ export type CoverageMarket = {
   status: CoverageStatus;
 };
 
-/**
- * Confirmed service markets. Keep empty until markets are provided.
- * Homepage and /coverage both read this file — do not hardcode states elsewhere.
- */
 export const coverageMarkets: CoverageMarket[] = [
-  // {
-  //   id: "sample-xx",
-  //   state: "Example State",
-  //   stateCode: "XX",
-  //   status: "expanding",
-  //   notes: "Replace once confirmed markets are provided.",
-  // },
+  { id: "nc", state: "North Carolina", stateCode: "NC", status: "expanding", notes: "Active/growing market. Coverage varies by county and service." },
+  { id: "tx", state: "Texas", stateCode: "TX", status: "expanding", notes: "Active/growing market. Coverage varies by county and service." },
+  { id: "ga", state: "Georgia", stateCode: "GA", status: "expanding", notes: "Active/growing market. Coverage varies by county and service." },
+  { id: "oh", state: "Ohio", stateCode: "OH", status: "expanding", notes: "Active/growing market. Coverage varies by county and service." },
+  { id: "wa", state: "Washington", stateCode: "WA", status: "expanding", notes: "Active/growing market. Coverage varies by county and service." },
 ];
 
 export const coverageCopy = {
-  heading: "Growing Coverage Across the United States",
+  heading: "Active and Growing Service Network",
   summary:
-    "TrueFix360 coordinates property services through an expanding network of field professionals across active U.S. service markets.",
+    "TrueFix360 maintains an active and growing field-service network across North Carolina, Texas, Georgia, Ohio, and Washington. Availability varies by county and service category.",
   availability:
-    "Service availability varies by property location, service type, trade, scope, and field availability.",
+    "Service availability varies by property location, service type, trade, scope, and field availability. A market state is not the same as county-level coverage.",
   inquiryNote:
-    "Need coverage somewhere not shown? Contact our operations team.",
+    "Need coverage somewhere not shown? Request a coverage review and operations will evaluate the location.",
   emptyState:
-    "Confirmed service markets will be listed here as coverage is published. If you need work in a specific area, contact the team and we will review local capability.",
+    "Confirmed county and service coverage is published as it is verified. If you need work in a specific area, request a coverage review.",
 } as const;
 
 export const coverageLegend = [
-  { status: "active" as const, label: "Active Coverage", description: "Established service capability." },
-  { status: "expanding" as const, label: "Expanding Coverage", description: "Vendor network being built." },
-  { status: "inquiry" as const, label: "Other U.S. Markets", description: "Available for coverage review." },
+  { status: "active" as const, label: "Established Coverage", description: "Verified county and service capability." },
+  { status: "expanding" as const, label: "Active / Growing Market", description: "Strategic market; coverage still varies by county and service." },
+  { status: "inquiry" as const, label: "Other U.S. Markets", description: "Available for coverage review and sourcing." },
 ];

@@ -97,6 +97,26 @@ export const coverageInquirySchema = z.object({
 
 export type CoverageInquiryValues = z.infer<typeof coverageInquirySchema>;
 
+export const coverageRequestSchema = z.object({
+  firstName: required("First name", 80),
+  lastName: required("Last name", 80),
+  company: z.string().trim().max(160).optional(),
+  email: z.email("Enter a valid email address.").max(160),
+  phone: required("Phone", 40),
+  propertyAddress: z.string().trim().max(200).optional(),
+  city: required("City", 80),
+  state: required("State", 2),
+  county: required("County", 80),
+  zip: z.string().trim().max(16).optional(),
+  serviceCategory: required("Service category", 80),
+  numberOfProperties: z.string().trim().max(20).optional(),
+  urgency: z.enum(["routine", "priority", "emergency"]),
+  description: required("Description", 8000).min(12, "Please describe the coverage needed."),
+  companyUrl: z.string().max(200).optional(),
+});
+
+export type CoverageRequestValues = z.infer<typeof coverageRequestSchema>;
+
 export const quoteCategories = [
   { value: "property-preservation", label: "Property Preservation" },
   { value: "property-maintenance", label: "Property Maintenance" },

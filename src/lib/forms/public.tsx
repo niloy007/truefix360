@@ -4,12 +4,14 @@ import { STORAGE_BUCKETS } from "@/config/platform";
 import { ContactConfirmation } from "@/emails/ContactConfirmation";
 import { InternalContactNotification } from "@/emails/InternalContactNotification";
 import { InternalQuoteNotification } from "@/emails/InternalQuoteNotification";
+import { CoverageRequestConfirmation } from "@/emails/CoverageRequestConfirmation";
+import { InternalCoverageRequestNotification } from "@/emails/InternalCoverageRequestNotification";
 import { InternalVendorApplicationNotification } from "@/emails/InternalVendorApplicationNotification";
 import { QuoteConfirmation } from "@/emails/QuoteConfirmation";
 import { VendorConfirmation } from "@/emails/VendorConfirmation";
 import { writeAuditLog } from "@/lib/audit";
 import {
-  coverageInquirySchema,
+  coverageRequestSchema,
   contactSchema,
   quoteSchema,
   vendorSchema,
@@ -25,6 +27,8 @@ import {
   splitPersonName,
   summarizeText,
 } from "@/lib/format";
+import { checkCoverage, recordDemandGap } from "@/lib/coverage/service";
+import { displayCountyName, normalizeStateCode, serviceLabel } from "@/lib/coverage/logic";
 import { notify } from "@/lib/notifications";
 import { storePrivateFiles } from "@/lib/storage";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -380,19 +384,134 @@ export async function submitVendor(input: unknown, idempotencyKey: string | null
 }
 
 export async function submitCoverage(input: unknown, idempotencyKey: string | null): Promise<FormSubmitResult> {
-  const parsed = coverageInquirySchema.parse(input);
+  const parsed = coverageRequestSchema.parse(input);
   if (isHoneypotTriggered(parsed.companyUrl)) return ignored();
-  const message = `Coverage inquiry for ${parsed.location}${parsed.message ? `\n\n${parsed.message}` : ""}`;
-  return submitContact(
-    {
-      name: parsed.name,
-      email: parsed.email,
-      phone: "Not provided",
-      topic: "coverage",
-      message,
-      companyUrl: parsed.companyUrl,
-    },
-    idempotencyKey,
+  await ready();
+  await enforceRateLimit("coverage", parsed.email);
+  const existing = await replay(idempotencyKey);
+  if (existing) return existing;
+
+  const stateCode = normalizeStateCode(parsed.state);
+  if (!stateCode) throw new Error("Enter a valid U.S. state.");
+  const check = await checkCoverage({
+    state: stateCode,
+    county: parsed.county,
+    service: parsed.serviceCategory,
+  });
+  const coverageResult = "error" in check ? "not_established" : check.status;
+  const countyName = "error" in check ? displayCountyName(parsed.county) : check.countyName;
+
+  const admin = createAdminClient();
+  const reference = await nextReference(admin, "coverage_request", "TFCR");
+  const { data, error } = await admin
+    .from("coverage_requests")
+    .insert({
+      reference_number: reference,
+      first_name: parsed.firstName,
+      last_name: parsed.lastName,
+      company: parsed.company || null,
+      email: normalizeEmail(parsed.email),
+      phone: normalizePhone(parsed.phone),
+      property_address: parsed.propertyAddress || null,
+      city: parsed.city,
+      state_code: stateCode,
+      county_name: countyName,
+      normalized_county_name: countyName.toLowerCase().replace(/\s+county$/, "").trim(),
+      zip: parsed.zip || null,
+      service_category: parsed.serviceCategory,
+      number_of_properties: parsed.numberOfProperties || null,
+      urgency: parsed.urgency,
+      description: parsed.description,
+      coverage_result_at_submission: coverageResult,
+      status: "new",
+      source: "website",
+    })
+    .select("id, created_at")
+    .single();
+  if (error || !data) throw new Error("The coverage request could not be saved.");
+
+  if (coverageResult === "not_established") {
+    await recordDemandGap({
+      state: stateCode,
+      county: parsed.county,
+      service: parsed.serviceCategory,
+      source: "coverage_request",
+      sourceId: data.id,
+      priority: parsed.urgency,
+    });
+  }
+
+  await saveIdempotent(idempotencyKey, "coverage_requests", data.id);
+  await writeAuditLog({
+    action: "coverage_request.submitted",
+    entityType: "coverage_requests",
+    entityId: data.id,
+    metadata: { reference, coverageResult },
+  });
+
+  const warning = await safeNotify(() =>
+    notify({
+      event: "coverage_request.submitted",
+      entityType: "coverage_requests",
+      entityId: data.id,
+      adminPath: `/admin/coverage/requests/${data.id}`,
+      replyTo: parsed.email,
+      officeEmail: {
+        subject: `[${reference}] Coverage Request — ${serviceLabel(parsed.serviceCategory)} — ${countyName}, ${stateCode}`,
+        react: (
+          <InternalCoverageRequestNotification
+            referenceNumber={reference}
+            firstName={parsed.firstName}
+            lastName={parsed.lastName}
+            company={parsed.company}
+            email={parsed.email}
+            phone={parsed.phone}
+            city={parsed.city}
+            state={stateCode}
+            county={countyName}
+            serviceCategory={serviceLabel(parsed.serviceCategory)}
+            urgency={parsed.urgency}
+            numberOfProperties={parsed.numberOfProperties}
+            description={parsed.description}
+            coverageResult={coverageResult}
+            adminUrl={absolute(`/admin/coverage/requests/${data.id}`)}
+          />
+        ),
+      },
+      submitterEmail: {
+        to: parsed.email,
+        subject: `We received your coverage request (${reference})`,
+        react: (
+          <CoverageRequestConfirmation
+            referenceNumber={reference}
+            name={parsed.firstName}
+            county={countyName}
+            state={stateCode}
+            serviceCategory={serviceLabel(parsed.serviceCategory)}
+          />
+        ),
+      },
+      whatsapp: {
+        template: "submission",
+        parameters: [
+          "Coverage request",
+          reference,
+          `${countyName}, ${stateCode}`,
+          serviceLabel(parsed.serviceCategory),
+          parsed.urgency,
+          parsed.numberOfProperties || "1",
+          "n/a",
+          "n/a",
+          "n/a",
+        ],
+      },
+    }),
+  );
+
+  return success(
+    reference,
+    "Your coverage request has been received. A request does not guarantee that local coverage can be sourced.",
+    warning,
   );
 }
 
@@ -426,7 +545,9 @@ async function replay(key: string | null): Promise<FormSubmitResult | null> {
       ? "quote_requests"
       : found.entity_type === "vendor_applications"
         ? "vendor_applications"
-        : "contact_submissions";
+        : found.entity_type === "coverage_requests"
+          ? "coverage_requests"
+          : "contact_submissions";
   const { data } = await admin
     .from(table)
     .select("reference_number, created_at")

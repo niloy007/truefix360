@@ -9,7 +9,8 @@ export type NotificationEvent =
   | "client_estimate.approved"
   | "client_estimate.declined"
   | "work_order.completed"
-  | "auth.first_login";
+  | "auth.first_login"
+  | "coverage_request.submitted";
 
 export type NotifyPayload = {
   event: NotificationEvent;

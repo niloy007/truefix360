@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getSiteUrl } from "@/config/env";
 import { writeAuditLog } from "@/lib/audit";
 import { requireInternalStaff } from "@/lib/auth/guards";
+import { proposeCoverageFromApplication } from "@/lib/coverage/service";
 import { retryNotification } from "@/lib/notifications";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AppRole } from "@/config/platform";
@@ -143,7 +145,7 @@ export async function approveVendorApplication(id: string) {
     .single();
   if (!org) throw new Error("Vendor organization could not be created.");
 
-  await admin.from("vendor_profiles").insert({
+  const { data: profile } = await admin.from("vendor_profiles").insert({
     organization_id: org.id,
     legal_name: app.company_name,
     primary_contact_name: `${app.first_name} ${app.last_name}`.trim(),
@@ -159,13 +161,22 @@ export async function approveVendorApplication(id: string) {
     insurance_status: app.insurance_status,
     workers_comp_status: app.workers_comp_status,
     onboarding_status: "approved",
-  });
+  }).select("id").single();
 
   await admin
     .from("vendor_applications")
     .update({ status: "approved", vendor_organization_id: org.id })
     .eq("id", id);
 
+  await proposeCoverageFromApplication({
+    applicationId: id,
+    organizationId: org.id,
+    profileId: profile?.id ?? null,
+    statesCovered: app.states_covered,
+    countiesCities: app.counties_cities,
+    services: app.services,
+    travelRadius: app.travel_radius,
+  });
   await inviteUser(org.id, app.email, "vendor_admin", app.first_name, app.last_name);
   await writeAuditLog({
     actorUserId: ctx.userId,
@@ -305,6 +316,77 @@ export async function assignWorkOrder(workOrderId: string, vendorOrganizationId:
     metadata: { vendorOrganizationId },
   });
   revalidatePath("/admin/work-orders");
+  revalidatePath("/admin/dispatch");
+  revalidatePath(`/admin/work-orders/${workOrderId}`);
+}
+
+export async function createWorkOrder(formData: FormData) {
+  const ctx = await staff();
+  const admin = createAdminClient();
+  const clientOrganizationId = String(formData.get("clientOrganizationId") ?? "");
+  const propertyId = String(formData.get("propertyId") ?? "") || null;
+  const title = String(formData.get("title") ?? "").trim();
+  const serviceCategory = String(formData.get("serviceCategory") ?? "").trim();
+  const priority = String(formData.get("priority") ?? "routine");
+  const scope = String(formData.get("scope") ?? "").trim();
+  const scheduledStart = String(formData.get("scheduledStart") ?? "") || null;
+  const scheduledEnd = String(formData.get("scheduledEnd") ?? "") || null;
+  if (!clientOrganizationId || !title || !serviceCategory) {
+    throw new Error("Client, title, and service category are required.");
+  }
+  const { data: reference } = await admin.rpc("next_reference", {
+    p_kind: "work_order",
+    p_prefix: "TFWO",
+  });
+  const { data: workOrder, error } = await admin
+    .from("work_orders")
+    .insert({
+      reference_number: reference,
+      client_organization_id: clientOrganizationId,
+      property_id: propertyId,
+      service_category: serviceCategory,
+      title,
+      scope,
+      priority,
+      scheduled_start: scheduledStart,
+      scheduled_end: scheduledEnd,
+      created_by: ctx.userId,
+    })
+    .select("id")
+    .single();
+  if (error || !workOrder) throw new Error("The work order could not be created.");
+  await admin.from("work_order_events").insert({
+    work_order_id: workOrder.id,
+    event: "created",
+    actor_user_id: ctx.userId,
+    new_status: "new",
+    visibility: "shared",
+  });
+  await writeAuditLog({
+    actorUserId: ctx.userId,
+    action: "work_order.created",
+    entityType: "work_orders",
+    entityId: workOrder.id,
+  });
+  revalidatePath("/admin/work-orders");
+  revalidatePath("/admin");
+  redirect(`/admin/work-orders/${workOrder.id}`);
+}
+
+export async function updateWorkOrderSchedule(formData: FormData) {
+  await staff();
+  const workOrderId = String(formData.get("workOrderId") ?? "");
+  const scheduledStart = String(formData.get("scheduledStart") ?? "") || null;
+  const scheduledEnd = String(formData.get("scheduledEnd") ?? "") || null;
+  const admin = createAdminClient();
+  const patch: Record<string, string | null> = {
+    scheduled_start: scheduledStart,
+    scheduled_end: scheduledEnd,
+  };
+  if (scheduledStart) patch.status = "scheduled";
+  await admin.from("work_orders").update(patch).eq("id", workOrderId);
+  revalidatePath(`/admin/work-orders/${workOrderId}`);
+  revalidatePath("/admin/dispatch");
 }
 
 export async function publishClientEstimate(formData: FormData) {

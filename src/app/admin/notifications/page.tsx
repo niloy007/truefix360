@@ -1,7 +1,7 @@
 import { retryNotificationAction } from "@/lib/admin/actions";
+import { PageHeader, StatusBadge } from "@/components/admin/ui";
 import { formatDateTime } from "@/lib/format";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { StatusBadge } from "@/components/app/AppShell";
 
 export default async function AdminNotificationsPage() {
   const admin = createAdminClient();
@@ -12,7 +12,7 @@ export default async function AdminNotificationsPage() {
     .limit(100);
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-3xl font-semibold">Notifications</h1>
+      <PageHeader title="Notifications" description="Delivery log for operational email and WhatsApp messages. Failed sends can be retried." />
       <div className="overflow-x-auto border border-line bg-white">
         <table className="min-w-full text-left text-sm">
           <thead className="bg-cream text-xs uppercase tracking-wide">

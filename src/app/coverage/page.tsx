@@ -1,90 +1,85 @@
-import { CoverageInquiryForm } from "@/components/forms/CoverageInquiryForm";
-import { UsaMap } from "@/components/sections/UsaMap";
+import Link from "next/link";
+import { CoverageChecker } from "@/components/coverage/CoverageChecker";
+import { USCoverageMap } from "@/components/coverage/USCoverageMap";
 import { Container } from "@/components/ui/Container";
 import { CTASection } from "@/components/ui/CTASection";
 import { PageHero } from "@/components/ui/PageHero";
-import { coverageCopy, coverageMarkets } from "@/data/coverage";
+import { stateName } from "@/lib/coverage/logic";
+import { getPublicMarketCards } from "@/lib/coverage/service";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
-  title: "Coverage",
+  title: "Service Coverage",
   description:
-    "TrueFix360 coordinates field services through a growing network. Request coverage information for a specific market.",
+    "Check TrueFix360 property preservation and property maintenance service coverage across active and growing markets including North Carolina, Texas, Georgia, Ohio, and Washington.",
   path: "/coverage",
 });
 
-export default function CoveragePage() {
+export default async function CoveragePage() {
+  const cards = await getPublicMarketCards();
+
   return (
     <>
       <PageHero
-        eyebrow="Coverage"
-        title="Service Coverage Built Around Local Capability"
-        description={coverageCopy.summary}
-        crumbs={[
-          { label: "Home", href: "/" },
-          { label: "Coverage" },
-        ]}
-        primaryCta={{ href: "#coverage-inquiry", label: "Request Coverage Information" }}
+        eyebrow="TrueFix360 Service Network"
+        title="Find Coverage Where You Need It"
+        description="TrueFix360 maintains an active and growing property-service network across North Carolina, Texas, Georgia, Ohio, and Washington. Coverage varies by county and service category."
+        crumbs={[{ label: "Home", href: "/" }, { label: "Coverage" }]}
+        primaryCta={{ href: "#coverage-checker", label: "Check Coverage" }}
+        secondaryCta={{ href: "/coverage/request", label: "Request Coverage" }}
       />
       <section className="section-space bg-white">
-        <Container className="grid items-start gap-12 lg:grid-cols-2">
+        <Container className="grid items-start gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <h2 className="font-heading text-3xl font-semibold tracking-tight">
-              How coverage works
-            </h2>
-            <p className="mt-5 text-base leading-7 text-muted sm:text-lg">
-              TrueFix360 does not invent nationwide coverage. Work is coordinated
-              through local field resources in active service markets. If you need
-              a new area, send the location and the team will review capability.
+            <h2 className="font-heading text-3xl font-semibold tracking-tight">Active and growing markets</h2>
+            <p className="mt-4 max-w-xl text-base leading-7 text-muted">
+              Highlighted states are TrueFix360 active or growing markets. That does not mean every county or every service in those states is currently covered.
             </p>
-            <div className="mt-8 overflow-x-auto border border-line">
-              <table className="w-full min-w-[28rem] text-left text-sm">
-                <thead className="bg-cream">
-                  <tr>
-                    <th className="px-4 py-3 font-heading">Market</th>
-                    <th className="px-4 py-3 font-heading">State</th>
-                    <th className="px-4 py-3 font-heading">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coverageMarkets.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="px-4 py-6 text-muted">
-                        {coverageCopy.emptyState}
-                      </td>
-                    </tr>
-                  ) : (
-                    coverageMarkets.map((market) => (
-                      <tr key={market.id} className="border-t border-line">
-                        <td className="px-4 py-3">{market.region ?? market.state}</td>
-                        <td className="px-4 py-3">{market.stateCode}</td>
-                        <td className="px-4 py-3 capitalize">{market.status}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div className="mt-8">
+              <USCoverageMap variant="coverage" />
             </div>
           </div>
-          <UsaMap />
+          <div id="coverage-checker">
+            <CoverageChecker />
+          </div>
         </Container>
       </section>
-      <section id="coverage-inquiry" className="section-space scroll-mt-28 bg-cream">
-        <Container width="narrow">
-          <h2 className="font-heading text-3xl font-semibold tracking-tight">
-            Need coverage here?
-          </h2>
-          <p className="mt-4 text-muted leading-7">
-            Share a city, county, or state. This inquiry is validated by the
-            website; production delivery is connected in a later phase.
+      <section className="section-space bg-cream">
+        <Container>
+          <h2 className="font-heading text-3xl font-semibold tracking-tight">Market states</h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {cards.map((card) => (
+              <Link
+                key={card.state_code}
+                href={`/coverage?state=${card.state_code}#coverage-checker`}
+                className="border border-line bg-white p-5 hover:border-brand"
+              >
+                <p className="font-heading text-lg font-semibold">{card.state_name || stateName(card.state_code)}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-brand">Active / growing market</p>
+                <p className="mt-3 text-sm text-muted">
+                  {card.verifiedCounties > 0
+                    ? `${card.verifiedCounties} verified ${card.verifiedCounties === 1 ? "county" : "counties"} · ${card.serviceCategories} service ${card.serviceCategories === 1 ? "category" : "categories"}`
+                    : "Coverage varies by county and service."}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
+      <section className="section-space bg-white">
+        <Container width="narrow" className="text-center">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight">Don&apos;t see your area?</h2>
+          <p className="mt-4 text-base leading-7 text-muted">
+            Our field network continues to expand. Tell us where you need service and what type of work is required. TrueFix360 will review the request and determine whether qualified local coverage can be sourced.
           </p>
-          <div className="mt-8 border border-line bg-white p-6 sm:p-8">
-            <CoverageInquiryForm />
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/coverage/request" className="inline-flex h-12 items-center bg-brand px-5 text-sm font-semibold text-white">Request Coverage</Link>
+            <Link href="/contact" className="inline-flex h-12 items-center border border-ink px-5 text-sm font-semibold">Contact Our Team</Link>
           </div>
         </Container>
       </section>
       <CTASection
-        title="Ready to request work in an active market?"
+        title="Need work in an established market?"
         primary={{ href: "/get-a-quote", label: "Get a Quote" }}
         secondary={{ href: "/contact", label: "Contact Us" }}
       />
