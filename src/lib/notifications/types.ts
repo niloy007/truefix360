@@ -10,7 +10,8 @@ export type NotificationEvent =
   | "client_estimate.declined"
   | "work_order.completed"
   | "auth.first_login"
-  | "coverage_request.submitted";
+  | "coverage_request.submitted"
+  | "vendor_network_submission";
 
 export type NotifyPayload = {
   event: NotificationEvent;

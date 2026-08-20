@@ -1,0 +1,210 @@
+=== CI AGENT RESULTS ===
+Generated: 2026-08-20T12:38:54-04:00
+Host: DESKTOP-AV1F7DG
+User: niloy
+
+=== PATH NOTE ===
+Requested path MISSING: /home/niloy/Projects/trueSale360
+Using workspace path instead: /home/niloy/Projects/truefix360
+
+=== ENVIRONMENT ===
+NVM_DIR=/home/niloy/.nvm
+node path: /home/niloy/.nvm/versions/node/v24.19.0/bin/node
+npm path: /home/niloy/.nvm/versions/node/v24.19.0/bin/npm
+npx path: /home/niloy/.nvm/versions/node/v24.19.0/bin/npx
+node -v: v24.19.0
+npm -v: 11.17.0
+
+cwd: /home/niloy/Projects/truefix360
+
+========================================
+COMMAND: npm test
+ARGV: npm test
+START: 2026-08-20T12:38:54-04:00
+----------------------------------------
+
+> truefix360@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90m/home/niloy/Projects/truefix360[39m
+
+ [32m✓[39m src/config/public-env.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/lib/admin/status.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/admin/users.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/auth/password.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/lib/coverage/logic.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/vendors/vendor-network.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/config/legal.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/lib/platform.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/lib/vendor-application/coverage.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[32m83 passed[39m[22m[90m (83)[39m
+[2m   Start at [22m 12:38:55
+[2m   Duration [22m 531ms[2m (transform 922ms, setup 0ms, import 1.86s, tests 115ms, environment 1ms)[22m
+
+----------------------------------------
+EXIT_CODE: 0
+END: 2026-08-20T12:38:55-04:00
+
+========================================
+COMMAND: npx tsc --noEmit
+ARGV: npx tsc --noEmit
+START: 2026-08-20T12:38:55-04:00
+----------------------------------------
+----------------------------------------
+EXIT_CODE: 0
+END: 2026-08-20T12:38:57-04:00
+
+========================================
+COMMAND: npm run lint
+ARGV: npm run lint
+START: 2026-08-20T12:38:57-04:00
+----------------------------------------
+
+> truefix360@0.1.0 lint
+> eslint
+
+----------------------------------------
+EXIT_CODE: 0
+END: 2026-08-20T12:39:04-04:00
+
+========================================
+COMMAND: npm run build
+ARGV: npm run build
+START: 2026-08-20T12:39:04-04:00
+----------------------------------------
+
+> truefix360@0.1.0 build
+> next build
+
+▲ Next.js 16.3.1 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 23ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 510ms
+  Running TypeScript ...
+  Finished TypeScript in 1776ms ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/25) ...
+  Generating static pages using 15 workers (6/25) 
+  Generating static pages using 15 workers (12/25) 
+  Generating static pages using 15 workers (18/25) 
+✓ Generating static pages using 15 workers (25/25) in 881ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ○ /accessibility
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/clients
+├ ƒ /admin/clients/[id]
+├ ƒ /admin/contacts
+├ ƒ /admin/contacts/[id]
+├ ƒ /admin/coverage
+├ ƒ /admin/coverage/[state]
+├ ƒ /admin/coverage/gaps
+├ ƒ /admin/coverage/requests
+├ ƒ /admin/coverage/requests/[id]
+├ ƒ /admin/dispatch
+├ ƒ /admin/estimates
+├ ƒ /admin/estimates/[id]
+├ ƒ /admin/files
+├ ƒ /admin/notifications
+├ ƒ /admin/properties
+├ ƒ /admin/quotes
+├ ƒ /admin/quotes/[id]
+├ ƒ /admin/service-requests
+├ ƒ /admin/service-requests/[id]
+├ ƒ /admin/settings
+├ ƒ /admin/users
+├ ƒ /admin/vendor-applications
+├ ƒ /admin/vendor-applications/[id]
+├ ƒ /admin/vendors
+├ ƒ /admin/vendors/[id]
+├ ƒ /admin/vendors/[id]/edit
+├ ƒ /admin/vendors/new
+├ ƒ /admin/work-orders
+├ ƒ /admin/work-orders/[id]
+├ ƒ /admin/work-orders/new
+├ ƒ /api/coverage/check
+├ ƒ /api/coverage/request
+├ ƒ /api/forms
+├ ƒ /api/forms/contact
+├ ƒ /api/forms/quote
+├ ƒ /api/forms/vendor-application
+├ ƒ /auth/callback
+├ ƒ /auth/invite
+├ ○ /contact
+├ ○ /coverage
+├ ƒ /coverage/request
+├ ○ /faq
+├ ○ /forgot-password
+├ ○ /get-a-quote
+├ ○ /login
+├ ○ /partners
+├ ƒ /portal/client
+├ ƒ /portal/client/account
+├ ƒ /portal/client/estimates
+├ ƒ /portal/client/estimates/[id]
+├ ƒ /portal/client/files
+├ ƒ /portal/client/properties
+├ ƒ /portal/client/requests
+├ ƒ /portal/client/requests/[id]
+├ ƒ /portal/client/requests/new
+├ ƒ /portal/client/work-orders
+├ ƒ /portal/client/work-orders/[id]
+├ ƒ /portal/select
+├ ƒ /portal/vendor
+├ ƒ /portal/vendor/account
+├ ƒ /portal/vendor/assignments
+├ ƒ /portal/vendor/assignments/[id]
+├ ƒ /portal/vendor/company
+├ ƒ /portal/vendor/completed
+├ ƒ /portal/vendor/coverage
+├ ƒ /portal/vendor/documents
+├ ƒ /portal/vendor/estimates
+├ ƒ /portal/vendor/schedule
+├ ○ /privacy
+├ ƒ /reset-password
+├ ○ /resident-experience
+├ ○ /residents
+├ ○ /robots.txt
+├ ○ /services
+├ ○ /services/property-maintenance
+├ ○ /services/property-preservation
+├ ○ /sitemap.xml
+├ ○ /terms
+├ ƒ /vendor-network/[token]
+├ ƒ /vendor-network/[token]/submit
+├ ƒ /vendor-network/[token]/vendors/[id]
+├ ○ /vendors
+└ ○ /vendors/apply
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+----------------------------------------
+EXIT_CODE: 0
+END: 2026-08-20T12:39:11-04:00
+
+========================================
+SUMMARY
+========================================
+npm test          -> exit 0 PASS
+npx tsc --noEmit  -> exit 0 PASS
+npm run lint      -> exit 0 PASS
+npm run build     -> exit 0 PASS
+
+Overall: ALL_PASS

@@ -27,7 +27,7 @@ describe("auth link errors", () => {
     expect(classifyAuthLinkError("user_already_registered", null)).toBe("used");
     expect(classifyAuthLinkError("access_denied", "invalid")).toBe("invalid");
     expect(parseAuthLinkErrorParam("missing")).toBe("missing");
-    expect(inviteLinkErrorMessage("expired")).toMatch(/expired/i);
+    expect(inviteLinkErrorMessage("expired")).toMatch(/resend your invitation/i);
     expect(inviteLinkErrorMessage("used")).toMatch(/already been used/i);
     expect(resetLinkErrorMessage("expired")).toMatch(/reset link has expired/i);
     expect(inviteLinkErrorMessage("invalid")).not.toMatch(/access_token|refresh_token|token_hash/i);
@@ -83,6 +83,18 @@ describe("invite destination", () => {
           organizationName: "Vendor Co",
           organizationType: "vendor",
           role: "crew",
+          status: "active",
+        },
+      ]),
+    ).toBe("/portal/vendor");
+    expect(
+      resolveHomePath([
+        {
+          id: "1",
+          organizationId: "a",
+          organizationName: "Vendor Co",
+          organizationType: "vendor",
+          role: "vendor_admin",
           status: "active",
         },
       ]),

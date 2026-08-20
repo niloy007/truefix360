@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -8,12 +8,23 @@ import { FieldWrap } from "@/components/forms/FieldWrap";
 import { loginAction } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 
+type AccountType = "client" | "vendor";
+
+function resolveInitialType(searchParams: URLSearchParams): AccountType {
+  const type = (searchParams.get("type") ?? "").toLowerCase();
+  if (type === "vendor") return "vendor";
+  return "client";
+}
+
 export function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "";
   const presetError = searchParams.get("error");
   const passwordReset = searchParams.get("passwordReset");
   const reset = searchParams.get("reset");
+  const [accountType, setAccountType] = useState<AccountType>(() =>
+    resolveInitialType(searchParams),
+  );
   const [state, action, pending] = useActionState(
     async (_prev: { error?: string } | null, formData: FormData) => loginAction(formData),
     null,
@@ -30,19 +41,50 @@ export function LoginForm() {
   return (
     <form className="grid gap-5" action={action} noValidate>
       <input type="hidden" name="next" value={next} />
+      {/* UX only — never used for authorization */}
+      <input type="hidden" name="accountTypeHint" value={accountType} />
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-ink">Account type</legend>
         <p className="mb-2 text-xs text-muted">
-          This helps you find the right portal. Access is determined by your TrueFix360 account, not this selection.
+          This helps you find the right portal. Access is determined by your TrueFix360 account, not
+          this selection.
         </p>
-        <div className="grid grid-cols-2 gap-2">
-          <span className={cn("border px-3 py-3 text-center text-sm font-semibold border-brand bg-brand text-white")}>
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label="Account type">
+          <button
+            type="button"
+            aria-pressed={accountType === "client"}
+            onClick={() => setAccountType("client")}
+            className={cn(
+              "border px-3 py-3 text-center text-sm font-semibold transition",
+              accountType === "client"
+                ? "border-brand bg-brand text-white"
+                : "border-line bg-white text-ink hover:border-brand/50",
+            )}
+          >
             Client / Partner
-          </span>
-          <span className="border border-line bg-white px-3 py-3 text-center text-sm font-semibold text-ink">
+          </button>
+          <button
+            type="button"
+            aria-pressed={accountType === "vendor"}
+            onClick={() => setAccountType("vendor")}
+            className={cn(
+              "border px-3 py-3 text-center text-sm font-semibold transition",
+              accountType === "vendor"
+                ? "border-brand bg-brand text-white"
+                : "border-line bg-white text-ink hover:border-brand/50",
+            )}
+          >
             Vendor
-          </span>
+          </button>
         </div>
+        <p className="mt-3 text-sm font-semibold text-ink">
+          {accountType === "vendor" ? "Vendor Access" : "Client & Partner Access"}
+        </p>
+        <p className="mt-1 text-xs text-muted">
+          {accountType === "vendor"
+            ? "Sign in with the credentials TrueFix360 provisioned for your vendor organization."
+            : "Sign in with the credentials TrueFix360 provisioned for your client or partner organization."}
+        </p>
       </fieldset>
       <FieldWrap label="Email" htmlFor="login-email" required>
         <input
@@ -88,11 +130,17 @@ export function LoginForm() {
       </Button>
       <p className="text-xs leading-5 text-muted">
         Use of this portal is subject to our{" "}
-        <Link href="/privacy" className="font-medium text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand">
+        <Link
+          href="/privacy"
+          className="font-medium text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand"
+        >
           Privacy Policy
         </Link>{" "}
         and{" "}
-        <Link href="/terms" className="font-medium text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand">
+        <Link
+          href="/terms"
+          className="font-medium text-ink underline decoration-brand/40 underline-offset-2 hover:text-brand"
+        >
           Terms of Service
         </Link>
         .

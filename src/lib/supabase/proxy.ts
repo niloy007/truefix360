@@ -40,11 +40,14 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isProtected =
-    path.startsWith("/admin") || path.startsWith("/portal");
+    path.startsWith("/admin") ||
+    path.startsWith("/portal") ||
+    path.startsWith("/vendor-network");
 
   if (isProtected && !user) {
     const login = new URL("/login", request.url);
-    login.searchParams.set("next", path);
+    const next = `${path}${request.nextUrl.search}`;
+    login.searchParams.set("next", next);
     return NextResponse.redirect(login);
   }
 
@@ -53,7 +56,11 @@ export async function updateSession(request: NextRequest) {
 
 function protectUnconfigured(request: NextRequest, response: NextResponse) {
   const path = request.nextUrl.pathname;
-  if (path.startsWith("/admin") || path.startsWith("/portal")) {
+  if (
+    path.startsWith("/admin") ||
+    path.startsWith("/portal") ||
+    path.startsWith("/vendor-network")
+  ) {
     const login = new URL("/login", request.url);
     login.searchParams.set("error", "not_configured");
     return NextResponse.redirect(login);

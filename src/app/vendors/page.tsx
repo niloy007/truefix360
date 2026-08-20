@@ -27,7 +27,7 @@ export default function VendorsPage() {
           { label: "Vendors" },
         ]}
         primaryCta={{ href: "/vendors/apply", label: "Apply Now" }}
-        secondaryCta={{ href: "/login", label: "Vendor Login" }}
+        secondaryCta={{ href: "/login?type=vendor", label: "Vendor Login" }}
       />
       <section className="section-space bg-white">
         <Container>

@@ -31,7 +31,7 @@ export function AdminShell({
   children,
 }: {
   user: AdminShellUser;
-  badges: { contacts: number; quotes: number; notifications: number };
+  badges: { contacts: number; quotes: number; notifications: number; vendors?: number };
   notifications: AdminNotificationItem[];
   children: React.ReactNode;
 }) {
@@ -70,7 +70,7 @@ export function AdminShell({
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const badge = item.badgeKey ? badges[item.badgeKey] : 0;
+                const badge = item.badgeKey ? (badges[item.badgeKey] ?? 0) : 0;
                 return (
                   <Link
                     key={item.href}

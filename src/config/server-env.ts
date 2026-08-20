@@ -66,4 +66,9 @@ export function isFirstUseAlertsEnabled(): boolean {
   return flag("LOGIN_FIRST_USE_ALERTS_ENABLED", true);
 }
 
+/** Server-only secret used to encrypt Vendor Network share tokens for admin recovery. */
+export function getVendorNetworkTokenEncryptionKey(): string | undefined {
+  return read("VENDOR_NETWORK_TOKEN_ENCRYPTION_KEY");
+}
+
 export { parseEmailList, parsePhoneList };

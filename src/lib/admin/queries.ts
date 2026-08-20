@@ -40,12 +40,13 @@ async function countWhere(table: string, apply: (query: CountFilter) => CountFil
 }
 
 export async function getInboxBadges() {
-  const [contacts, quotes, notifications] = await Promise.all([
+  const [contacts, quotes, notifications, vendors] = await Promise.all([
     countWhere("contact_submissions", (q) => q.eq("status", "new")),
     countWhere("quote_requests", (q) => q.eq("status", "new")),
     countWhere("notification_deliveries", (q) => q.in("status", ["pending", "failed"])),
+    countWhere("vendor_network_submissions", (q) => q.eq("status", "pending")),
   ]);
-  return { contacts, quotes, notifications };
+  return { contacts, quotes, notifications, vendors };
 }
 
 const WORK_ORDER_LIST_SELECT = `

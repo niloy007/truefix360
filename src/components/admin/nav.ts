@@ -21,7 +21,7 @@ export type AdminNavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  badgeKey?: "contacts" | "quotes" | "notifications";
+  badgeKey?: "contacts" | "quotes" | "notifications" | "vendors";
 };
 
 export type AdminNavGroup = {
@@ -45,7 +45,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: "/admin/clients", label: "Clients", icon: Building2 },
       { href: "/admin/properties", label: "Properties", icon: MapPinned },
-      { href: "/admin/vendors", label: "Vendors", icon: Users },
+      { href: "/admin/vendors", label: "Vendors", icon: Users, badgeKey: "vendors" },
       { href: "/admin/vendor-applications", label: "Vendor Applications", icon: ShieldCheck },
       { href: "/admin/coverage", label: "Coverage", icon: MapPinned },
     ],

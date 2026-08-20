@@ -2,14 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getSiteUrl } from "@/config/env";
 import { writeAuditLog } from "@/lib/audit";
 import { requireInternalStaff } from "@/lib/auth/guards";
 import { proposeCoverageFromApplication } from "@/lib/coverage/service";
 import { formatCoverageSummary, parseCoveragePayload } from "@/lib/vendor-application/coverage";
 import { retryNotification } from "@/lib/notifications";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { AppRole } from "@/config/platform";
+import { inviteUser } from "@/lib/admin/user-actions";
 
 async function staff() {
   return requireInternalStaff();
@@ -162,6 +161,12 @@ export async function approveVendorApplication(id: string) {
     insurance_status: app.insurance_status,
     workers_comp_status: app.workers_comp_status,
     onboarding_status: "approved",
+    source: "vendor_application",
+    vendor_status: "active",
+    shared_network_visible: false,
+    preferred: false,
+    phone_normalized: String(app.phone ?? "").replace(/\D/g, "") || null,
+    email_normalized: String(app.email ?? "").trim().toLowerCase() || null,
   }).select("id").single();
 
   await admin
@@ -191,53 +196,8 @@ export async function approveVendorApplication(id: string) {
 }
 
 export async function inviteUserAction(formData: FormData) {
-  const ctx = await staff();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const organizationId = String(formData.get("organizationId") ?? "");
-  const role = String(formData.get("role") ?? "") as AppRole;
-  const firstName = String(formData.get("firstName") ?? "");
-  const lastName = String(formData.get("lastName") ?? "");
-  if (!email || !organizationId || !role) {
-    throw new Error("Email, organization, and role are required.");
-  }
-  await inviteUser(organizationId, email, role, firstName, lastName);
-  await writeAuditLog({
-    actorUserId: ctx.userId,
-    organizationId,
-    action: role === "client" ? "client.invite" : "vendor.invite",
-    entityType: "invitations",
-    metadata: { email, role },
-  });
-  revalidatePath("/admin/users");
-}
-
-async function inviteUser(
-  organizationId: string,
-  email: string,
-  role: AppRole,
-  firstName: string,
-  lastName: string,
-) {
-  const admin = createAdminClient();
-  await admin.from("invitations").insert({
-    email,
-    organization_id: organizationId,
-    role,
-    status: "pending",
-  });
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${getSiteUrl()}/auth/invite`,
-    data: { first_name: firstName, last_name: lastName },
-  });
-  if (error) throw new Error("The invitation could not be sent.");
-  if (data.user) {
-    await admin.from("organization_memberships").upsert({
-      organization_id: organizationId,
-      user_id: data.user.id,
-      role,
-      status: "invited",
-    }, { onConflict: "organization_id,user_id,role" });
-  }
+  const { inviteUserAction: invite } = await import("@/lib/admin/user-actions");
+  return invite(formData);
 }
 
 export async function retryNotificationAction(id: string) {

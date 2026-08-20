@@ -64,15 +64,15 @@ export function inviteLinkErrorMessage(kind: AuthLinkErrorKind | null): string |
   if (!kind) return null;
   switch (kind) {
     case "expired":
-      return "This invitation has expired. Ask TrueFix360 to send a new invite.";
+      return "This invitation link is no longer valid. Ask a TrueFix360 administrator to resend your invitation.";
     case "used":
       return "This invitation has already been used. Sign in with your password.";
     case "missing":
-      return "This invitation session is missing or has expired. Open the invite email again.";
+      return "This invitation link is no longer valid. Ask a TrueFix360 administrator to resend your invitation.";
     case "not_configured":
       return "Portal invitations are not configured yet. Contact TrueFix360.";
     default:
-      return "This invitation link is invalid. Ask TrueFix360 to send a new invite.";
+      return "This invitation link is invalid. Ask a TrueFix360 administrator to resend your invitation.";
   }
 }
 

@@ -11,6 +11,7 @@ import {
 import { writeAuditLog } from "@/lib/audit";
 import { getAuthContext, resolveHomePath } from "@/lib/auth/guards";
 import { validateNewPassword } from "@/lib/auth/password";
+import { safeLoginNextPath } from "@/lib/admin/users";
 import { InternalGenericNotification } from "@/emails/InternalGenericNotification";
 import { formatDateTime } from "@/lib/format";
 import { notify } from "@/lib/notifications";
@@ -36,12 +37,11 @@ export async function loginAction(formData: FormData) {
 
   await recordLoginActivity();
   const ctx = await getAuthContext();
-  const destination =
-    next.startsWith("/") && !next.startsWith("//")
-      ? next
-      : ctx
-        ? resolveHomePath(ctx.memberships)
-        : "/login";
+  // accountTypeHint from the login form is UX-only and must never authorize access.
+  const destination = safeLoginNextPath(
+    next,
+    ctx ? resolveHomePath(ctx.memberships) : "/login",
+  );
   redirect(destination);
 }
 

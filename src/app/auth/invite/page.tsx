@@ -107,6 +107,7 @@ export default async function InvitePage({ searchParams }: InvitePageProps) {
       message={message}
       showForm={Boolean(user)}
       alreadyUsed={kind === "used"}
+      expired={kind === "expired" || kind === "missing"}
     />
   );
 }
@@ -115,10 +116,12 @@ function InviteScreen({
   message,
   showForm,
   alreadyUsed = false,
+  expired = false,
 }: {
   message: string | null;
   showForm: boolean;
   alreadyUsed?: boolean;
+  expired?: boolean;
 }) {
   return (
     <section className="min-h-screen bg-ink">
@@ -127,11 +130,12 @@ function InviteScreen({
           <Logo inverted className="mb-8" />
           <p className="eyebrow mb-4">Portal Access</p>
           <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-            Welcome to TrueFix360
+            {expired ? "Invitation expired" : "Welcome to TrueFix360"}
           </h1>
           <p className="mt-5 max-w-md text-muted-dark leading-7">
-            Create a password to finish setting up your invited account. Access is
-            based on the organization TrueFix360 assigned to you.
+            {expired
+              ? "This invitation link is no longer valid. Ask a TrueFix360 administrator to resend your invitation."
+              : "Create a password to finish setting up your invited account. Access is based on the organization TrueFix360 assigned to you."}
           </p>
         </div>
         <div className="border border-white/10 bg-white p-6 sm:p-8">
@@ -147,20 +151,29 @@ function InviteScreen({
                 >
                   {message}
                 </p>
+                <div className="flex flex-wrap gap-3 text-sm">
+                  <Link
+                    href="/login"
+                    className="inline-flex h-11 items-center bg-brand px-4 font-semibold text-white"
+                  >
+                    Return to Login
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="inline-flex h-11 items-center border border-line px-4 font-semibold text-ink hover:border-brand"
+                  >
+                    Contact TrueFix360
+                  </Link>
+                </div>
                 {alreadyUsed ? (
                   <p className="text-sm text-muted">
+                    If you already set a password, use{" "}
                     <Link href="/login" className="font-semibold text-ink hover:text-brand">
                       Sign in
                     </Link>
+                    .
                   </p>
-                ) : (
-                  <p className="text-sm text-muted">
-                    Need a new invite?{" "}
-                    <Link href="/contact" className="font-semibold text-ink hover:text-brand">
-                      Contact TrueFix360
-                    </Link>
-                  </p>
-                )}
+                ) : null}
               </div>
             ) : null}
             {showForm ? <InvitePasswordForm /> : null}
