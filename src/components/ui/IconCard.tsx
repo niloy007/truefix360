@@ -24,7 +24,7 @@ export function IconCard({
           dark ? "bg-white/8 text-brand" : "bg-cream text-brand",
         )}
       >
-        <Icon className="size-5" aria-hidden="true" />
+          <Icon className="size-5 shrink-0" width={20} height={20} aria-hidden="true" />
       </span>
       <div>
         <h3 className={cn("font-heading text-lg font-semibold", dark ? "text-white" : "text-ink")}>

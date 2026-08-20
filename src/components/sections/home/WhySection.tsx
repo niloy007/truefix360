@@ -46,7 +46,12 @@ export function WhySection() {
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {reasons.map((reason) => (
             <article key={reason.title} className="border border-line bg-white p-6">
-              <reason.icon className="size-8 text-brand" aria-hidden="true" />
+              <reason.icon
+                className="size-8 shrink-0 text-brand"
+                width={32}
+                height={32}
+                aria-hidden="true"
+              />
               <h3 className="mt-5 font-heading text-xl font-semibold text-ink">{reason.title}</h3>
               <p className="mt-2 text-sm leading-6 text-muted">{reason.body}</p>
             </article>

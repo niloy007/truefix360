@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export type MediaVariant =
@@ -48,28 +48,10 @@ export function MediaBlock({
   sizes = "100vw",
   priority = false,
 }: MediaBlockProps) {
-  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
   const decorative = alt === "";
-  const showPhoto = Boolean(src) && loadedSrc === src;
+  const showPhoto = Boolean(src) && !failed;
   const fallbackLabel = alt || captions[variant];
-
-  useEffect(() => {
-    if (!src) return;
-
-    let cancelled = false;
-    const probe = new window.Image();
-    probe.onload = () => {
-      if (!cancelled) setLoadedSrc(src);
-    };
-    probe.onerror = () => {
-      if (!cancelled) setLoadedSrc(null);
-    };
-    probe.src = src;
-
-    return () => {
-      cancelled = true;
-    };
-  }, [src]);
 
   return (
     <div
@@ -91,13 +73,10 @@ export function MediaBlock({
           sizes={sizes}
           className="pointer-events-none select-none"
           style={{ objectFit, objectPosition }}
-          onError={() => setLoadedSrc(null)}
+          onError={() => setFailed(true)}
         />
       ) : (
-        <>
-          <div className="absolute inset-0 pattern-grid opacity-50" aria-hidden="true" />
-          <PlaceholderArt variant={variant} />
-        </>
+        <PlaceholderArt variant={variant} />
       )}
       <div
         className="pointer-events-none absolute inset-0 bg-linear-to-t from-near-black/80 via-ink/20 to-transparent"
@@ -107,45 +86,62 @@ export function MediaBlock({
         className="pointer-events-none absolute top-0 left-0 h-full w-1.5 bg-brand"
         aria-hidden="true"
       />
-      <p
-        className="pointer-events-none absolute bottom-5 left-5 right-5 font-heading text-sm font-medium tracking-wide text-white/85"
-        aria-hidden="true"
-      >
-        {fallbackLabel}
-      </p>
+      {!showPhoto ? (
+        <p
+          className="pointer-events-none absolute bottom-5 left-5 right-5 font-heading text-sm font-medium tracking-wide text-white/85"
+          aria-hidden="true"
+        >
+          {fallbackLabel}
+        </p>
+      ) : null}
     </div>
   );
 }
 
+/**
+ * Subtle fallback when photography is unavailable.
+ * Must NEVER scale a house/check mark to the full media frame — that caused the
+ * production homepage giant-icon regression (SVG with h-full/w-full in hero).
+ */
 function PlaceholderArt({ variant }: { variant: MediaVariant }) {
-  const palette = {
-    hero: { a: "#2a3036", b: "#F35A18" },
-    preservation: { a: "#243038", b: "#d97a3a" },
-    maintenance: { a: "#2c3430", b: "#F35A18" },
-    vendor: { a: "#2a2f38", b: "#e07a3a" },
-    resident: { a: "#2d322c", b: "#F35A18" },
-    about: { a: "#262c32", b: "#F35A18" },
-    field: { a: "#283038", b: "#F35A18" },
+  const tint = {
+    hero: "from-near-black via-ink to-[#243038]",
+    preservation: "from-near-black via-[#1c242a] to-[#243038]",
+    maintenance: "from-near-black via-[#1e2622] to-[#2c3430]",
+    vendor: "from-near-black via-[#1c222c] to-[#2a2f38]",
+    resident: "from-near-black via-[#22261f] to-[#2d322c]",
+    about: "from-near-black via-ink to-[#262c32]",
+    field: "from-near-black via-ink to-[#283038]",
   }[variant];
 
   return (
-    <svg
-      viewBox="0 0 800 560"
-      className="h-full w-full object-cover"
-      aria-hidden="true"
-      preserveAspectRatio="xMidYMid slice"
-    >
-      <rect width="800" height="560" fill={palette.a} />
-      <rect x="0" y="330" width="800" height="230" fill="#1a1f24" />
-      <polygon points="90,330 250,170 410,330" fill="#3a424a" />
-      <rect x="170" y="250" width="70" height="80" fill="#171a1d" />
-      <rect x="430" y="210" width="220" height="120" fill="#323940" />
-      <rect x="470" y="250" width="46" height="80" fill="#171a1d" />
-      <circle cx="640" cy="120" r="46" fill="#cfd5da" opacity="0.28" />
-      <rect x="540" y="360" width="170" height="90" fill="#2f363d" />
-      <rect x="80" y="390" width="140" height="70" fill="#2b3238" />
-      <path d="M120 430h40M140 410v40" stroke={palette.b} strokeWidth="6" />
-      <rect x="0" y="0" width="18" height="560" fill={palette.b} />
-    </svg>
+    <div className={cn("absolute inset-0 bg-linear-to-br", tint)} aria-hidden="true">
+      <div className="absolute inset-0 pattern-grid opacity-40" />
+      <div className="absolute inset-0 grid place-items-center">
+        <svg
+          viewBox="0 0 32 32"
+          width={64}
+          height={64}
+          className="size-16 shrink-0 text-white/25"
+          fill="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            d="M5 14.5L16 6l11 8.5V26a1.5 1.5 0 0 1-1.5 1.5h-19A1.5 1.5 0 0 1 5 26V14.5Z"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+          <path
+            d="M11.5 18.5 14.8 21.8 21 14.5"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+      <div className="absolute inset-y-0 left-0 w-1.5 bg-brand" />
+    </div>
   );
 }

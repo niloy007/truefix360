@@ -1,4 +1,4 @@
-import { company } from "@/config/company";
+import { brandAssets, company } from "@/config/company";
 import { site } from "@/config/site";
 import { hasValue } from "@/lib/utils";
 
@@ -9,7 +9,7 @@ export function organizationJsonLd(): Record<string, unknown> {
     name: company.name,
     url: company.url,
     description: site.description,
-    logo: `${company.url}/brand/truefix360-logo.png`,
+    logo: `${company.url}${brandAssets.logo}`,
   };
 
   if (hasValue(company.legalName)) {

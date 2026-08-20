@@ -43,5 +43,7 @@ export const company: CompanyConfig = {
 };
 
 export const brandAssets = {
-  logo: "/brand/truefix360-logo.png",
+  /** Prefer PNG when present; favicon.svg is the checked-in fallback mark. */
+  logo: "/favicon.svg",
+  logoPng: "/brand/truefix360-logo.png",
 } as const;

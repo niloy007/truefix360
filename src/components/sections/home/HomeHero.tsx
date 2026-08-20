@@ -72,7 +72,12 @@ export function HomeHero() {
                 key={item.label}
                 className="flex items-center gap-2 border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-medium tracking-wide text-white/85 sm:text-sm"
               >
-                <item.icon className="size-4 shrink-0 text-brand" aria-hidden="true" />
+                <item.icon
+                  className="size-4 shrink-0 text-brand"
+                  width={16}
+                  height={16}
+                  aria-hidden="true"
+                />
                 {item.label}
               </li>
             ))}

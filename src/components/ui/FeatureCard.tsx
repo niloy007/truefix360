@@ -29,11 +29,11 @@ export function FeatureCard({
       {Icon ? (
         <span
           className={cn(
-            "mb-4 grid size-10 place-items-center rounded-md",
+            "mb-4 grid size-10 shrink-0 place-items-center rounded-md",
             dark ? "bg-white/8 text-brand" : "bg-cream text-brand",
           )}
         >
-          <Icon className="size-5" aria-hidden="true" />
+          <Icon className="size-5 shrink-0" width={20} height={20} aria-hidden="true" />
         </span>
       ) : null}
       <h3 className={cn("font-heading text-lg font-semibold", dark ? "text-white" : "text-ink")}>

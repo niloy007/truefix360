@@ -67,7 +67,12 @@ export function VisitorPaths() {
                   : "border-line bg-white hover:border-brand/50",
               )}
             >
-              <path.icon className="size-8 text-brand" aria-hidden="true" />
+              <path.icon
+                className="size-8 shrink-0 text-brand"
+                width={32}
+                height={32}
+                aria-hidden="true"
+              />
               <p className="eyebrow mt-5">{path.eyebrow}</p>
               <h3 className="mt-3 font-heading text-xl font-semibold text-ink">{path.title}</h3>
               <p className="mt-3 flex-1 text-sm leading-6 text-muted">{path.description}</p>
