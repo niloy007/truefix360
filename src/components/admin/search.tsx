@@ -49,7 +49,15 @@ export function AdminSearch() {
       <label className="sr-only" htmlFor="admin-search">
         Search work order, address, client, vendor
       </label>
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
+      {/*
+        Icon is absolutely positioned. `.input-field` sets a shorthand `padding`
+        that would otherwise override Tailwind pl-* utilities — use !pl-* so text
+        never sits under the icon.
+      */}
+      <Search
+        className="pointer-events-none absolute top-1/2 left-3 z-[1] size-4 -translate-y-1/2 text-muted"
+        aria-hidden="true"
+      />
       <input
         id="admin-search"
         value={query}
@@ -71,7 +79,7 @@ export function AdminSearch() {
           }
         }}
         placeholder="Search work order, address, client, vendor..."
-        className="input-field h-10 py-0 pl-9 text-sm"
+        className="input-field box-border h-10 !py-0 !pr-3 !pl-10 text-sm"
         role="combobox"
         aria-expanded={open}
         aria-controls={listId}

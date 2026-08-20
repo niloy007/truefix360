@@ -18,7 +18,7 @@ import {
 } from "@/lib/vendor-network/token-crypto-core";
 import { canManageNetworkEdits, canSubmitVendors } from "@/lib/vendor-network/permissions";
 import { adminVendorFormSchema, networkSubmissionSchema, shareLinkSchema } from "@/lib/vendors/schema";
-import { formatVendorCoverage, truncateTrades } from "@/lib/vendors/presentation";
+import { formatVendorCoverage, truncateTrades, vendorInitials } from "@/lib/vendors/presentation";
 import { buildVendorFilterHref } from "@/lib/vendors/filter-href";
 import { shareLinkStatus } from "@/lib/vendors/share-link-status";
 import { getSiteUrl } from "@/config/public-env";
@@ -181,17 +181,21 @@ describe("vendor filter URL params", () => {
 });
 
 describe("vendor card presentation", () => {
-  it("truncates trades and formats coverage", () => {
+  it("truncates trades, builds initials, and formats coverage", () => {
     const trades = Array.from({ length: 14 }, (_, i) => `Trade ${i + 1}`);
     const { shown, more } = truncateTrades(trades, 3);
     expect(shown).toHaveLength(3);
     expect(more).toBe(11);
+    expect(vendorInitials("Anointed Hands Handyman Services")).toBe("AH");
+    expect(vendorInitials("Georgia Home Services")).toBe("GH");
+    expect(vendorInitials("ABC Maintenance")).toBe("AM");
     expect(
       formatVendorCoverage({
         coverage_cities: ["Pittsburgh"],
+        state: "PA",
         service_radius_miles: 50,
       }),
-    ).toBe("Pittsburgh +50 mi");
+    ).toBe("Pittsburgh, PA · 50-mile radius");
     expect(
       formatVendorCoverage({
         state: "PA",

@@ -6,11 +6,29 @@ export function truncateTrades(trades: string[], limit = 3): { shown: string[]; 
   return { shown: clean.slice(0, limit), more: clean.length - limit };
 }
 
-export function formatVendorCoverage(profile: Record<string, unknown> | null | undefined): string {
-  if (!profile) return "—";
-  const coverage = String(profile.coverage ?? "").trim();
-  if (coverage) return coverage;
+/** Two-letter initials from a company name for avatar placeholders. */
+export function vendorInitials(name: string): string {
+  const parts = name
+    .replace(/[^a-zA-Z0-9\s]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+}
 
+export type CoverageSummary = {
+  primary: string;
+  secondary?: string;
+};
+
+export function formatVendorCoverageParts(
+  profile: Record<string, unknown> | null | undefined,
+): CoverageSummary {
+  if (!profile) return { primary: "—" };
+
+  const coverage = String(profile.coverage ?? "").trim();
   const cities = Array.isArray(profile.coverage_cities)
     ? (profile.coverage_cities as string[])
     : [];
@@ -20,21 +38,51 @@ export function formatVendorCoverage(profile: Record<string, unknown> | null | u
   const states = Array.isArray(profile.coverage_states)
     ? (profile.coverage_states as string[])
     : [];
-  const radius =
-    profile.service_radius_miles != null ? `+${profile.service_radius_miles} mi` : null;
+  const radiusMiles =
+    typeof profile.service_radius_miles === "number"
+      ? profile.service_radius_miles
+      : profile.service_radius_miles != null
+        ? Number(profile.service_radius_miles)
+        : null;
+  const radiusLabel =
+    radiusMiles != null && !Number.isNaN(radiusMiles)
+      ? `${radiusMiles}-mile radius`
+      : undefined;
 
-  if (cities[0]) return [cities[0], radius].filter(Boolean).join(" ");
+  if (coverage) {
+    return { primary: coverage, secondary: radiusLabel };
+  }
+
+  if (cities[0]) {
+    const primary = [cities[0], states[0] ?? profile.state].filter(Boolean).join(", ");
+    return { primary, secondary: radiusLabel };
+  }
+
   if (counties.length) {
-    return [states[0] ?? profile.state, `${counties.length} counties`, radius]
+    const primary = [states[0] ?? profile.state, `${counties.length} counties`]
       .filter(Boolean)
       .join(" · ");
+    return { primary, secondary: radiusLabel };
   }
-  if (states.length === 1 && !radius) return String(states[0]);
-  if (states.length) return [states.join(", "), radius].filter(Boolean).join(" ");
+
+  if (states.length) {
+    return {
+      primary: states.length === 1 ? String(states[0]) : states.join(", "),
+      secondary: radiusLabel,
+    };
+  }
+
   if (profile.city || profile.state) {
-    return [[profile.city, profile.state].filter(Boolean).join(", "), radius]
-      .filter(Boolean)
-      .join(" ");
+    return {
+      primary: [profile.city, profile.state].filter(Boolean).join(", "),
+      secondary: radiusLabel,
+    };
   }
-  return "—";
+
+  return { primary: "—" };
+}
+
+export function formatVendorCoverage(profile: Record<string, unknown> | null | undefined): string {
+  const parts = formatVendorCoverageParts(profile);
+  return [parts.primary, parts.secondary].filter(Boolean).join(" · ");
 }

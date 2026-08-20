@@ -13,6 +13,8 @@ type VendorRowActionsProps = {
   email?: string | null;
   preferred?: boolean;
   shared?: boolean;
+  /** Card footer uses stronger primary action labels. */
+  variant?: "table" | "card";
 };
 
 export function VendorRowActions({
@@ -21,6 +23,7 @@ export function VendorRowActions({
   email,
   preferred = false,
   shared = false,
+  variant = "table",
 }: VendorRowActionsProps) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -54,17 +57,34 @@ export function VendorRowActions({
     });
   }
 
+  const isCard = variant === "card";
+
   return (
-    <div ref={rootRef} className="relative flex max-w-full min-w-0 flex-wrap items-center gap-1.5">
+    <div
+      ref={rootRef}
+      className={
+        isCard
+          ? "relative flex max-w-full min-w-0 flex-wrap items-center gap-2"
+          : "relative flex max-w-full min-w-0 flex-wrap items-center gap-1.5"
+      }
+    >
       <Link
         href={`/admin/vendors/${vendorId}`}
-        className="inline-flex h-8 items-center border border-line px-2.5 text-xs font-semibold hover:border-brand"
+        className={
+          isCard
+            ? "inline-flex h-9 flex-1 items-center justify-center bg-ink px-3 text-xs font-semibold text-white hover:bg-near-black sm:flex-none"
+            : "inline-flex h-8 items-center border border-line px-2.5 text-xs font-semibold hover:border-brand"
+        }
       >
-        View
+        {isCard ? "View Vendor" : "View"}
       </Link>
       <Link
         href={`/admin/dispatch?vendor=${vendorId}`}
-        className="inline-flex h-8 items-center border border-line px-2.5 text-xs font-semibold hover:border-brand"
+        className={
+          isCard
+            ? "inline-flex h-9 items-center justify-center border border-line px-3 text-xs font-semibold hover:border-brand"
+            : "inline-flex h-8 items-center border border-line px-2.5 text-xs font-semibold hover:border-brand"
+        }
       >
         Assign
       </Link>
@@ -74,7 +94,11 @@ export function VendorRowActions({
         aria-expanded={open}
         aria-label="More vendor actions"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-8 w-8 items-center justify-center border border-line text-sm font-semibold hover:border-brand"
+        className={
+          isCard
+            ? "ml-auto inline-flex h-9 w-9 items-center justify-center border border-line text-sm font-semibold hover:border-brand"
+            : "inline-flex h-8 w-8 items-center justify-center border border-line text-sm font-semibold hover:border-brand"
+        }
       >
         ⋯
       </button>

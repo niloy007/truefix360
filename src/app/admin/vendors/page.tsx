@@ -246,8 +246,8 @@ export default async function AdminVendorsPage({
               <div
                 className={
                   view === "table"
-                    ? "grid grid-cols-1 gap-3 md:hidden"
-                    : "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
+                    ? "grid grid-cols-1 gap-4 md:hidden"
+                    : "grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
                 }
               >
                 {vendors.map((row) => (
